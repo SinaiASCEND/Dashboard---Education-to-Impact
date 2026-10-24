@@ -307,9 +307,12 @@ const SCHEMAS = {
 const state = {db:null, actions:[], meetings:[], gaps:[], materials:[], milestones:[], members:[], minutes:[], outbox:[], links:[], kpis:{}, loaded:false, writable:false};
 let tab = "overview";
 const TAB_GROUPS = [
-  ["Plan",[["overview","Overview"],["roadmap","Roadmap"],["plan","Plan & KPIs"],["milestones","KPI milestones"]]],
-  ["People",[["teams","Year 1 teams"]]],
-  ["Evidence",[["gaps","G2.2 gap register"],["files","Working files"]]]];
+  ["Both groups",[["overview","Overview"],["plan","Plan & KPIs"],["teams","Year 1 teams"],["files","Shared files"]]],
+  ["G2.2 working group",[["g22","Gap Closure"]]],
+  ["G3.1 working group",[["g31","Competency Framework"]]]];
+const GROUP_TAB = {"G2.2":"g22","G3.1":"g31"};
+// Which group a SharePoint file belongs to; files for neither are shared (the working details workbook, Steering Committee papers).
+const groupOf = l => /^G2\.2\b|Gap Report/i.test(l.name||"") ? "G2.2" : /^G3\.1\b/i.test(l.name||"") ? "G3.1" : "";
 const TABS = TAB_GROUPS.flatMap(([,t])=>t);
 
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -356,9 +359,9 @@ function vOverview(){
     <div class="card stat"><b>12</b><span>Year 1 initiatives and working groups</span></div>
     <div class="card stat"><b>32</b><span>draft key performance indicators, to be confirmed by each group</span></div>
   </section>
-  <section class="card"><div class="row spread"><div><h2>Working files</h2><p class="small muted" style="margin:4px 0 0">Charters, the gap report, members, actions, meetings, minutes and Steering Committee materials open in SharePoint with a Mount Sinai sign-in.</p></div><button class="btn ghost" data-go="files">Working files</button></div></section>
-  <section class="grid" style="gap:12px"><h2>G2.2 and G3.1</h2><p class="lede">Two connected Year 1 initiatives co-led by Rainier Soriano and Ravi Ramaswamy, confirmed by Dean Thomas on Sept 9.</p>
-    <div class="grid g2">${MY_GOALS.map(goalCard).join("")}</div></section>
+  <section class="grid" style="gap:12px"><h2>G2.2 and G3.1</h2><p class="lede">Two connected Year 1 initiatives co-led by Rainier Soriano and Ravi Ramaswamy, confirmed by Dean Thomas on Sept 9. This page and the Plan, Year 1 teams and Shared files pages are common to both working groups; each group has its own page for its key performance indicators, roadmap, milestones and documents.</p>
+    <div class="grid g2">${MY_GOALS.map(groupTeaser).join("")}</div></section>
+  <section class="card"><div class="row spread"><div><h2>Shared files</h2><p class="small muted" style="margin:4px 0 0">The working details workbook (members, actions, meetings, minutes and materials for both groups) and the Steering Committee materials open in SharePoint with a Mount Sinai sign-in. Each group's charter is on its own page.</p></div><button class="btn ghost" data-go="files">Shared files</button></div></section>
   <section class="grid g2">
     <div class="card"><h2 style="margin-bottom:14px">Timeline</h2><div class="timeline">${TIMELINE.map((t,i)=>`<div class="tl ${t[0]<TODAY?"past":""} ${i===nextIdx?"next":""}"><div class="when tnum">${fmt(t[0])}</div><div>${esc(t[1])}</div></div>`).join("")}</div></div>
     <div class="card"><h2 style="margin-bottom:10px">How the plan fits together</h2>
@@ -371,6 +374,42 @@ function vOverview(){
   </section>`;
 }
 function kpiStatus(id){return state.kpis[id]||{};}
+function groupTeaser(gid){
+  const g=GOAL[gid], t=TEAMS.find(x=>x[1]===gid), ks=PLAN.K.filter(k=>k.g===gid), ms=state.milestones.filter(m=>(m.kpi||"").startsWith(gid+"-"));
+  const next=ms.filter(m=>!["Done","Dropped"].includes(m.status)).sort((a,b)=>(a.due||"9").localeCompare(b.due||"9"))[0];
+  return `<div class="card mine grid" style="gap:10px">
+    <span class="mono">${gid} · ${g.p} ${esc(PRI[g.p].name)}</span>
+    <h3 style="font:650 19px/1.25 var(--display)">${esc(g.init)}</h3>
+    <p class="small" style="margin:0">${esc(g.y1)}</p>
+    <div class="small muted">Co-leads ${esc(t[2])} &amp; ${esc(t[3])} · PM ${esc(t[4])}</div>
+    <div class="small">${ks.length} key performance indicators · ${ms.length} milestones, ${ms.filter(m=>m.status==="Done").length} done${next?` · next: ${esc(next.title)} (${fmt(next.due)})`:""}</div>
+    <div><button class="btn primary" data-go="${GROUP_TAB[gid]}">Open the ${gid} page →</button></div>
+  </div>`;
+}
+function groupFiles(gid){
+  const rs=state.links.filter(l=>groupOf(l)===gid);
+  if(!rs.length) return `<div class="empty">No ${gid} documents listed yet.</div>`;
+  return `<div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${rs.map(l=>`<tr><td style="min-width:240px"><b><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a></b></td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function vGroup(gid){
+  const g=GOAL[gid], t=TEAMS.find(x=>x[1]===gid), ks=PLAN.K.filter(k=>k.g===gid);
+  rmInit=gid;   // Expand all / Collapse all on the timeline act on this group only
+  const jump=[["g-kpis","Key performance indicators"],["g-road","Roadmap"],["g-ms","Milestones"]].concat(gid==="G2.2"?[["g-gaps","Gap register"]]:[]).concat([["g-files","Documents"]]);
+  return `<div><div class="eyebrow muted">${gid} · Year 1 working group · ${g.p} ${esc(PRI[g.p].name)}</div><h2>${esc(g.init)}</h2><p class="lede">${esc(g.goal)}</p>
+    <div class="chips" style="margin-top:6px">${jump.map(([id,l])=>`<a class="chip int" href="#${id}" data-jump="${id}">${l}</a>`).join("")}</div></div>
+  <section class="grid g2">
+    <div class="card grid" style="gap:8px;align-content:start"><h3>Year 1 outcome</h3><p class="small" style="margin:0">${esc(g.y1)}</p>
+      <div class="small muted">Co-leads ${esc(t[2])} &amp; ${esc(t[3])} · PM ${esc(t[4])} · ${t[5]} milestones in the plan workbook</div>
+      ${g.res?`<div class="small"><b>Resourcing:</b> ${esc(g.res)}</div>`:""}${g.links?`<div class="small"><b>Linked initiatives:</b> ${esc(g.links)}</div>`:""}
+      ${g.issue?`<div class="issue">Open issue: ${esc(g.issue)}</div>`:""}</div>
+    <div class="card grid" style="gap:8px;align-content:start"><h3>Why this initiative</h3><p class="small" style="margin:0">${esc(g.why)}</p></div>
+  </section>
+  <section class="grid" style="gap:10px" id="g-kpis"><h3>Key performance indicators</h3><div class="grid" style="gap:8px">${ks.map(kpiRow).join("")}</div></section>
+  <section class="grid" style="gap:10px" id="g-road"><h3>Roadmap, October 2026 – May 2027</h3>${state.loaded?timelineSvg([gid]):storeNote()}</section>
+  <section class="grid" style="gap:10px" id="g-ms"><h3>Key performance indicator milestones</h3><p class="small muted" style="margin:0">Each key performance indicator broken into staged milestones that build to its end target. Drafts for the working group to confirm in its charter (due Nov 13).</p>${state.loaded?msGoal(g):storeNote()}</section>
+  ${gid==="G2.2"?`<section class="grid" style="gap:10px" id="g-gaps">${gapRegister()}</section>`:""}
+  <section class="grid" style="gap:10px" id="g-files"><h3>${gid} documents</h3><p class="small muted" style="margin:0">Open in SharePoint with a Mount Sinai sign-in. Members, actions, meetings and minutes for both groups are in the working details workbook on <a href="#files" data-go="files">Shared files</a>.</p>${groupFiles(gid)}</section>`;
+}
 function goalCard(gid){
   const g=GOAL[gid], t=TEAMS.find(x=>x[1]===gid), ks=PLAN.K.filter(k=>k.g===gid);
   const done=ks.filter(k=>kpiStatus(k.id).status==="Complete").length;
@@ -439,16 +478,8 @@ function memberList(gid){
   return `<details class="small"><summary style="cursor:pointer"><b>Working group members</b> <span class="muted">(${ms.length} seats)</span></summary>
    <div style="display:grid;gap:8px;margin-top:8px">${ms.map(m=>`<div class="row" style="gap:8px;flex-wrap:nowrap">${avatar(m,32)}<div style="min-width:0;flex:1"><b>${esc(m.name)}</b> <span class="muted">· ${esc(m.seat)}</span></div>${statusPill(m.status)}</div>`).join("")}</div></details>`;
 }
-let msInit="mine";
-function vMilestones(){
-  if(!state.loaded) return `<div><h2>Key performance indicator milestones</h2></div>${storeNote()}`;
-  const y1=PLAN.G.filter(g=>MY_GOALS.includes(g.id));
-  const goals=msInit==="mine"?y1:y1.filter(g=>g.id===msInit);
-  const all=state.milestones, dn=all.filter(m=>m.status==="Done").length, late=all.filter(m=>m.due<TODAY&&!["Done","Dropped"].includes(m.status)).length;
-  return `<div><h2>Key performance indicator milestones</h2><p class="lede">The key performance indicators for G2.2 and G3.1, each broken into staged milestones that build to its end target, with a target date and what counts as done. Drafts for the working groups to confirm in the charters (due Nov 13); stages change as each group decides.</p></div>
-  <div class="grid g4"><div class="card stat"><b>${all.length}</b><span>milestones across ${PLAN.K.filter(k=>MY_GOALS.includes(k.g)).length} key performance indicators</span></div><div class="card stat"><b>${dn}</b><span>done</span></div><div class="card stat"><b>${late}</b><span>past target date, not done</span></div><div class="card stat"><b>${all.filter(m=>m.status==="At risk").length}</b><span>at risk</span></div></div>
-  ${listToolbar("milestones",`<select id="fMs" aria-label="Initiative"><option value="mine" ${msInit==="mine"?"selected":""}>Both initiatives (G2.2, G3.1)</option>${y1.map(g=>`<option value="${g.id}" ${msInit===g.id?"selected":""}>${g.id} · ${esc(g.init)}</option>`).join("")}</select>`)}
-  ${goals.map(g=>`<section class="card grid ${MY_GOALS.includes(g.id)?"mine":""}" style="gap:14px"><div><span class="mono">${g.id}</span><h3 style="font:650 19px/1.25 var(--display)">${esc(g.init)}</h3><div class="small muted">Year 1 outcome: ${esc(g.y1)}</div></div>
+function msGoal(g){
+  return `<section class="card grid" style="gap:14px">
    ${PLAN.K.filter(k=>k.g===g.id).map(k=>{const ms=msFor(k.id); return `<div class="grid" style="gap:8px">
     <div class="row spread"><div style="min-width:0;flex:1"><span class="mono">${k.id}</span> <b>${esc(k.name)}</b> <span class="small muted">· end target due ${fmt(k.due)}</span></div></div>
     <p class="small muted" style="margin:0">${esc(k.text)}</p>
@@ -456,7 +487,7 @@ function vMilestones(){
      ${ms.map((m,i)=>`<tr><td class="num">${i+1}</td><td class="num ${m.due<TODAY&&!["Done","Dropped"].includes(m.status)?"issue":""}">${fmt(m.due)}</td><td style="min-width:220px">${esc(m.title)}${m.owner?`<div class="small muted">Owner: ${esc(m.owner)}</div>`:""}${m.notes?`<div class="small muted">${esc(m.notes)}</div>`:""}</td><td class="small" style="min-width:180px">${esc(m.done_when)}</td>
       <td><select aria-label="Milestone status" data-msstatus="${m._id}" ${state.writable?"":"disabled"}>${SCHEMAS.milestones.fields[4][3].map(o=>`<option ${m.status===o?"selected":""}>${o}</option>`).join("")}</select></td>
       <td>${state.writable?`<button class="btn ghost" data-edit="milestones:${m._id}">Edit</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">No milestones yet for ${k.id}.</div>`}
-   </div>`}).join("")}</section>`).join("")}`;
+   </div>`}).join("")}</section>`;
 }
 /* ---------- roadmap ---------- */
 let rmInit="both";
@@ -486,23 +517,9 @@ function timelineSvg(gs){
   <div class="tablebox tlg" aria-label="Timeline of milestones for ${gs.join(" and ")}. Select a row to list its milestones.">${head}${rows}</div>
   <div class="row small muted" style="gap:14px"><span class="row" style="gap:5px"><i style="width:10px;height:10px;border-radius:50%;border:1.5px solid var(--navy);display:inline-block"></i>Milestone (number = stage; hover or tap for details)</span><span class="row" style="gap:5px"><i style="width:10px;height:10px;background:var(--accent);transform:rotate(45deg);display:inline-block"></i>Key performance indicator end target</span><span>Filled: done (green) or in progress (blue)</span></div>`;
 }
-function vRoadmap(){
-  if(!state.loaded) return `<div><h2>Roadmap</h2></div>${storeNote()}`;
-  const gs=rmInit==="both"?["G2.2","G3.1"]:[rmInit];
-  const steps=state.actions.filter(a=>a.status!=="Done"&&gs.some(g=>(a.initiative||"").includes(g))).sort((a,b)=>(a.due||"9").localeCompare(b.due||"9"));
-  const soon=steps.filter(a=>!a.due||a.due<=new Date(Date.now()+45*864e5).toISOString().slice(0,10));
-  const later=steps.filter(a=>!soon.includes(a));
-  const row=a=>`<div class="card" style="padding:12px 14px"><div class="row spread" style="gap:8px;align-items:flex-start"><div style="min-width:0;flex:1"><div class="small muted tnum ${a.due&&a.due<TODAY?"issue":""}">${fmt(a.due)} · ${esc(a.initiative||"")} · ${esc(a.owner||"")}</div><div><b>${esc(a.title)}</b></div>${a.notes?`<div class="small muted">${linkify(a.notes)}</div>`:""}${linkChips(a.links)}</div>
-    <select aria-label="Status" data-status="${a._id}" ${state.writable?"":"disabled"}>${SCHEMAS.actions.fields[3][3].map(o=>`<option ${a.status===o?"selected":""}>${o}</option>`).join("")}</select></div></div>`;
-  return `<div class="row spread"><div><h2>Roadmap</h2><p class="lede">Timeline of the key performance indicator milestones for G2.2 and G3.1. Next steps and actions are in the working details workbook on the Working files tab.</p></div>
-   <select id="fRm" aria-label="Initiative"><option value="both" ${rmInit==="both"?"selected":""}>Both (G2.2, G3.1)</option><option value="G2.2" ${rmInit==="G2.2"?"selected":""}>G2.2 Curriculum Content Gap Closure</option><option value="G3.1" ${rmInit==="G3.1"?"selected":""}>G3.1 Emerging Healthcare Competency Framework</option></select></div>
-  <section class="grid" style="gap:10px"><h3>Timeline, October 2026 – May 2027</h3>${timelineSvg(gs)}</section>
-`;
-}
-
 function vTeams(){
   return `<div><h2>Year 1 working groups</h2><p class="lede">Co-leads and project managers as announced Oct 5. Each group has 4–7 members, every seat owning part of the work; add a student or resident voice only where the initiative touches their experience.</p></div>
-  <p class="note">Working group members are listed in the working details workbook on the <a href="#files" data-go="files">Working files tab</a>.</p>
+  <p class="note">Working group members are listed in the working details workbook on the <a href="#files" data-go="files">Shared files</a> page.</p>
   <div class="tablebox"><table><thead><tr><th>Goal</th><th>Initiative</th><th>Co-lead 1</th><th>Co-lead 2</th><th>Group PM</th><th class="num">Milestones</th></tr></thead><tbody>
   ${TEAMS.map(t=>`<tr ${MY_GOALS.includes(t[1])?'style="background:var(--accent-soft)"':""}><td class="mono">${t[1]}</td><td>${esc(GOAL[t[1]].init)}</td><td>${esc(t[2])}</td><td>${esc(t[3])}</td><td>${esc(t[4])}</td><td class="num">${t[5]}</td></tr>`).join("")}
   </tbody></table></div>
@@ -511,11 +528,11 @@ function vTeams(){
 function listToolbar(kind, extra=""){
   return `<div class="row spread"><div class="filters">${extra}</div>${state.loaded&&state.writable?`<button class="btn primary" data-add="${kind}">Add ${SCHEMAS[kind].title}</button>`:""}</div>`;
 }
-function vGaps(){
-  if(!state.loaded) return `<div><h2>G2.2 gap register</h2></div>${storeNote()}`;
+function gapRegister(){
+  if(!state.loaded) return `<h3>Gap register</h3>${storeNote()}`;
   const rows=state.gaps.slice().sort((a,b)=>(a.order??99)-(b.order??99));
   const dec=s=>rows.filter(r=>(r.decision||"Pending")===s).length;
-  return `<div><h2>Curriculum Content Gap Closure · gap register</h2><p class="lede">G2.2-K1: every currently flagged gap gets a documented EEC decision (Address, Defer or Monitor) by Dec 31, 2026. Starting list from the AY 2025–26 Strategic Curriculum Gap Analysis, with evidence updated to October 2026 data. The working group confirms the list; G2.2 covers all gaps, not only these.</p></div>
+  return `<div><h3>Gap register</h3><p class="small muted" style="margin:4px 0 0">G2.2-K1: every currently flagged gap gets a documented EEC decision (Address, Defer or Monitor) by Dec 31, 2026. Starting list from the AY 2025–26 Strategic Curriculum Gap Analysis, with evidence updated to October 2026 data. The working group confirms the list; G2.2 covers all gaps, not only these.</p></div>
   <div class="grid g4">${["Pending","Address","Defer","Monitor"].map(s=>`<div class="card stat"><b>${dec(s)}</b><span>${s}</span></div>`).join("")}</div>
   ${listToolbar("gaps")}
   ${rows.length?`<div class="tablebox"><table><thead><tr><th>Gap</th><th>Area</th><th>Evidence</th><th>EEC decision</th><th></th></tr></thead><tbody>
@@ -524,29 +541,30 @@ function vGaps(){
    <td>${state.writable?`<button class="btn ghost" data-edit="gaps:${r._id}">Edit</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">No gaps logged.</div>`}`;
 }
 function vFiles(){
-  const docs=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout");
-  const sc=state.links.filter(l=>!docs.includes(l)).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  const docs=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout"&&!groupOf(l));
+  const sc=state.links.filter(l=>["Pre-read","Synopsis","Handout"].includes(l.kind)).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
   const row=l=>`<tr><td style="min-width:240px"><b><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a></b></td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td></tr>`;
   const table=rs=>`<div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${rs.map(row).join("")}</tbody></table></div>`;
-  return `<div><h2>Working files</h2><p class="lede">These open in SharePoint. Sign in with your Mount Sinai account; anyone at Mount Sinai with the link can view them. The working details workbook holds the G2.2 and G3.1 members, actions, meetings, minutes and materials.</p></div>
-  ${state.links.length?`<section class="grid" style="gap:10px"><h3>G2.2 and G3.1 documents</h3>${table(docs)}</section>
+  return `<div><h2>Shared files</h2><p class="lede">Files common to both working groups. These open in SharePoint. Sign in with your Mount Sinai account; anyone at Mount Sinai with the link can view them. The working details workbook holds the G2.2 and G3.1 members, actions, meetings, minutes and materials. Each group's charter and documents are on its own page: <a href="#g22" data-go="g22">G2.2</a> · <a href="#g31" data-go="g31">G3.1</a>.</p></div>
+  ${state.links.length?`<section class="grid" style="gap:10px"><h3>Both groups</h3>${table(docs)}</section>
   <section class="grid" style="gap:10px"><h3>Steering Committee materials</h3>${table(sc)}</section>`:`<div class="empty">No working files listed yet.</div>`}`;
 }
-const VIEWS={overview:vOverview,roadmap:vRoadmap,plan:vPlan,milestones:vMilestones,teams:vTeams,gaps:vGaps,files:vFiles};
+const VIEWS={overview:vOverview,plan:vPlan,teams:vTeams,files:vFiles,g22:()=>vGroup("G2.2"),g31:()=>vGroup("G3.1")};
 function artIndex(){
-  // The key documents (charters, gap report, working details) as chips; every file is on the Working files tab.
+  // The key documents (charters, gap report, working details) as chips; shared files and each group's documents have their own pages.
   const rows=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout");
   if(!rows.length) return "";
   const short=n=>String(n||"").replace(/\s*\((Claude Doc[^)]*|for EEC)\)\s*$/i,"");
   let open=true; try{ open=localStorage.getItem("aixClosed")!=="1"; }catch(_){}
-  return `<details class="aix" id="aix"${open?" open":""}><summary><h2>Key documents</h2><span class="small muted">${rows.length} documents · open in SharePoint · all files on the Working files tab</span></summary>
+  return `<details class="aix" id="aix"${open?" open":""}><summary><h2>Key documents</h2><span class="small muted">${rows.length} documents · open in SharePoint</span></summary>
   <div class="grp"><div class="chips">${rows.map(r=>`<a class="chip" href="${esc(r.url)}" target="_blank" rel="noopener" title="${esc(r.notes||r.kind||"")}">${esc(short(r.name))}</a>`).join("")}</div></div></details>`;
 }
 document.addEventListener("toggle",ev=>{ if(ev.target.id==="aix"){ try{ localStorage.setItem("aixClosed",ev.target.open?"0":"1"); }catch(_){} } },true);
-function render(){ document.getElementById("view").innerHTML=(state.loaded?artIndex():"")+VIEWS[tab](); }
+function render(){ document.getElementById("view").innerHTML=(state.loaded&&!/^g\d/.test(tab)?artIndex():"")+VIEWS[tab](); }   // group pages list their own documents
 
 /* ---------- interactions ---------- */
 document.getElementById("view").addEventListener("click",e=>{
+  const jp=e.target.closest("[data-jump]"); if(jp){e.preventDefault(); document.getElementById(jp.dataset.jump)?.scrollIntoView({behavior:"smooth",block:"start"}); return;}
   const go=e.target.closest("[data-go]"); if(go){e.preventDefault(); if(VIEWS[go.dataset.go]){tab=go.dataset.go; renderTabs(); render(); scrollTo(0,0);} return;}
   const tk=e.target.closest("[data-tlk]"); if(tk){const id=tk.dataset.tlk; rmOpen.has(id)?rmOpen.delete(id):rmOpen.add(id); render(); document.querySelector(`[data-tlk="${id}"]`)?.focus({preventScroll:true}); return;}
   const ta=e.target.closest("[data-tlall]"); if(ta){const gs=rmInit==="both"?["G2.2","G3.1"]:[rmInit]; PLAN.K.filter(k=>gs.includes(k.g)).forEach(k=>ta.dataset.tlall==="open"?rmOpen.add(k.id):rmOpen.delete(k.id)); render(); return;}
@@ -561,7 +579,6 @@ document.getElementById("view").addEventListener("change",async e=>{
   const t=e.target;
   if(t.id==="fAct"){actFilter=t.value; render(); return;}
   if(t.id==="fInit"){actInit=t.value; render(); return;}
-  if(t.id==="fMs"){msInit=t.value; render(); return;}
   if(t.id==="fFocus"){planFocus=t.checked; render(); return;}
   if(t.id==="fRm"){rmInit=t.value; render(); return;}
   if(t.id==="fMin"){minGroup=t.value; render(); return;}
@@ -629,7 +646,7 @@ function openKpiNote(id){
 }
 
 /* ---------- boot ---------- */
-try{const t=localStorage.getItem("fei-tab"); if(t&&VIEWS[t]) tab=t;}catch(_){}
+try{const t=({gaps:"g22",roadmap:"overview",milestones:"overview"})[localStorage.getItem("fei-tab")]||localStorage.getItem("fei-tab"); if(t&&VIEWS[t]) tab=t;}catch(_){}
 if(location.hash&&VIEWS[location.hash.slice(1)]) tab=location.hash.slice(1);
 renderTabs(); render();
 (function(){
