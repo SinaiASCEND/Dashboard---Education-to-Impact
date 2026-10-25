@@ -532,11 +532,12 @@ function gapRegister(){
   if(!state.loaded) return `<h3>Gap register</h3>${storeNote()}`;
   const rows=state.gaps.slice().sort((a,b)=>(a.order??99)-(b.order??99));
   const dec=s=>rows.filter(r=>(r.decision||"Pending")===s).length;
-  return `<div><h3>Gap register</h3><p class="small muted" style="margin:4px 0 0">G2.2-K1: every currently flagged gap gets a documented EEC decision (Address, Defer or Monitor) by Dec 31, 2026. Starting list from the AY 2025–26 Strategic Curriculum Gap Analysis, with evidence updated to October 2026 data. The working group confirms the list; G2.2 covers all gaps, not only these.</p></div>
+  return `<div><h3>Gap register</h3><p class="small muted" style="margin:4px 0 0">G2.2-K1: every currently flagged gap gets a documented EEC decision (Address, Defer or Monitor) by Dec 31, 2026. Starting list from the AY 2025–26 Strategic Curriculum Gap Analysis, with evidence updated to October 2026 data. The working group confirms the list; G2.2 covers all gaps, not only these.</p>
+  <p class="small muted" style="margin:4px 0 0">Each gap is classified by type, then routed: Phase 1 gaps to PCCS, Phase 2 and 3 gaps to CCS, AOC and thread gaps to CIS, and from there to the EEC.${(()=>{const c={};rows.forEach(r=>(r.route||"To be routed").split(/\s*(?:,| and )\s*/).forEach(x=>c[x]=(c[x]||0)+1));return " Gaps by route: "+Object.entries(c).map(([k,v])=>`${esc(k)} ${v}`).join(" · ")+"."})()}</p></div>
   <div class="grid g4">${["Pending","Address","Defer","Monitor"].map(s=>`<div class="card stat"><b>${dec(s)}</b><span>${s}</span></div>`).join("")}</div>
   ${listToolbar("gaps")}
-  ${rows.length?`<div class="tablebox"><table><thead><tr><th>Gap</th><th>Area</th><th>Evidence</th><th>EEC decision</th><th></th></tr></thead><tbody>
-  ${rows.map(r=>`<tr><td style="min-width:180px"><b>${esc(r.topic)}</b>${r.notes?`<div class="small muted">${esc(r.notes)}</div>`:""}</td><td>${esc(r.area)}</td><td class="small" style="min-width:240px">${esc(r.evidence)}</td>
+  ${rows.length?`<div class="tablebox"><table><thead><tr><th>Gap</th><th>Area</th><th>Type</th><th>Route</th><th>Evidence</th><th>EEC decision</th><th></th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td style="min-width:180px"><b>${esc(r.topic)}</b>${r.notes?`<div class="small muted">${esc(r.notes)}</div>`:""}</td><td>${esc(r.area)}</td><td>${esc(r.type||"—")}</td><td style="white-space:nowrap">${esc(r.route||"—")}</td><td class="small" style="min-width:240px">${esc(r.evidence)}</td>
    <td><select aria-label="Decision" data-gapdec="${r._id}" ${state.writable?"":"disabled"}>${["Pending","Address","Defer","Monitor"].map(o=>`<option ${(r.decision||"Pending")===o?"selected":""}>${o}</option>`).join("")}</select></td>
    <td>${state.writable?`<button class="btn ghost" data-edit="gaps:${r._id}">Edit</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">No gaps logged.</div>`}`;
 }
