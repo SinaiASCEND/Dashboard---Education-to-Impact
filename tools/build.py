@@ -24,7 +24,7 @@ WORKBOOK = "Strategic Plan working details - G2.2 and G3.1.xlsx"
 GAP_PDF = "Curriculum Gap Report - Phases 1 and 2 - October 2026.pdf"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-GAP_FIELDS = ("topic", "area", "evidence", "decision", "owner", "notes", "order", "_id")
+GAP_FIELDS = ("topic", "area", "type", "route", "priority", "evidence", "decision", "owner", "notes", "order", "_id")
 MS_FIELDS = ("kpi", "due", "title", "done_when", "status", "owner", "seq", "_id")
 SHEETS = {
     "Members": ("members", [("initiative", "Initiative"), ("kind", "Role in this work"), ("name", "Name"), ("role", "Title"),
