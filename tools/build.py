@@ -94,6 +94,7 @@ def main():
     public = {"generated": data.get("generated", ""),
               "gaps": [{k: g[k] for k in GAP_FIELDS if k in g} for g in data["gaps"]],
               "milestones": [{k: m[k] for k in MS_FIELDS if k in m} for m in data["milestones"]],
+              "emerging": [{k: e[k] for k in ("topic", "why", "strength", "status", "order", "_id") if k in e} for e in data.get("emerging", [])],
               "links": [{k: l[k] for k in ("name", "kind", "date", "url", "format", "note") if k in l} for l in links if l.get("url")]}
     blob = json.dumps(public, ensure_ascii=False)
     for bad in ("@mssm.edu", "@mountsinai.org", "/files/", "/docs/"):
