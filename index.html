@@ -363,6 +363,15 @@ function vOverview(){
   </section>
   <section class="grid" style="gap:12px"><h2>G2.2 and G3.1</h2><p class="lede">Two connected Year 1 initiatives co-led by Rainier Soriano and Ravi Ramaswamy, confirmed by Dean Thomas on Sept 9. This page and the Plan, Year 1 teams and Shared files pages are common to both working groups; each group has its own page for its key performance indicators, roadmap, milestones and documents.</p>
     <div class="grid g2">${MY_GOALS.map(groupTeaser).join("")}</div></section>
+  <section class="card" id="gap-or-emerging"><h2>Gap or emerging topic?</h2>
+    <p class="small muted" style="margin:4px 0 10px">Each topic has one home. The test: does someone already expect the MD program to teach it?</p>
+    <div class="tablebox"><table><thead><tr><th></th><th>Gap (G2.2)</th><th>Emerging topic (G3.1)</th></tr></thead><tbody>
+      <tr><td><b>Test</b></td><td>An expectation already exists and the curriculum falls short</td><td>Practice is moving ahead of any settled expectation</td></tr>
+      <tr><td><b>Evidence</b></td><td>LCME Standard 7, MEPOs, the USMLE content outline, outcome data, or most schools already requiring it (AAMC SCOPE)</td><td>Horizon scans, Mount Sinai institutional strengths, few schools teaching it yet</td></tr>
+      <tr><td><b>Aim</b></td><td>Catch up to the floor</td><td>Get ahead, then set the bar</td></tr>
+      <tr><td><b>Output</b></td><td>An EEC decision: Address, Defer or Monitor</td><td>A competency framework</td></tr>
+    </tbody></table></div>
+    <p class="small" style="margin:10px 0 0">A topic moves from emerging to gap once a standard names it. The 2027–28 LCME Standard 7 names artificial intelligence, so the basic, required use of AI is now a G2.2 gap while its frontier stays in G3.1. Nutrition moved the same way when USMLE added it to every Step in June 2026.</p></section>
   <section class="card"><div class="row spread"><div><h2>Shared files</h2><p class="small muted" style="margin:4px 0 0">The working details workbook (members, actions, meetings, minutes and materials for both groups) and the Steering Committee materials open in SharePoint with a Mount Sinai sign-in. Each group's charter is on its own page.</p></div><button class="btn ghost" data-go="files">Shared files</button></div></section>
   <section class="grid g2">
     <div class="card"><h2 style="margin-bottom:14px">Timeline</h2><div class="timeline">${TIMELINE.map((t,i)=>`<div class="tl ${t[0]<TODAY?"past":""} ${i===nextIdx?"next":""}"><div class="when tnum">${fmt(t[0])}</div><div>${esc(t[1])}</div></div>`).join("")}</div></div>
@@ -398,6 +407,7 @@ function vGroup(gid){
   rmInit=gid;   // Expand all / Collapse all on the timeline act on this group only
   const jump=[["g-kpis","Key performance indicators"],["g-road","Roadmap"],["g-ms","Milestones"]].concat(gid==="G2.2"?[["g-gaps","Gap register"]]:[]).concat([["g-files","Documents"]]);
   return `<div><div class="eyebrow muted">${gid} · Year 1 working group · ${g.p} ${esc(PRI[g.p].name)}</div><h2>${esc(g.init)}</h2><p class="lede">${esc(g.goal)}</p>
+    <p class="small muted" style="margin:6px 0 0">${gid==="G2.2"?"G2.2 takes gaps: topics the program is already expected to teach and falls short on.":"G3.1 takes emerging topics: areas where practice is moving ahead of any settled expectation."} <a href="#gap-or-emerging" data-go="overview" data-anchor="gap-or-emerging">Gap or emerging topic?</a></p>
     <div class="chips" style="margin-top:6px">${jump.map(([id,l])=>`<a class="chip int" href="#${id}" data-jump="${id}">${l}</a>`).join("")}</div></div>
   <section class="grid g2">
     <div class="card grid" style="gap:8px;align-content:start"><h3>Year 1 outcome</h3><p class="small" style="margin:0">${esc(g.y1)}</p>
@@ -579,7 +589,7 @@ function render(){ document.getElementById("view").innerHTML=(state.loaded&&!/^g
 /* ---------- interactions ---------- */
 document.getElementById("view").addEventListener("click",e=>{
   const jp=e.target.closest("[data-jump]"); if(jp){e.preventDefault(); document.getElementById(jp.dataset.jump)?.scrollIntoView({behavior:"smooth",block:"start"}); return;}
-  const go=e.target.closest("[data-go]"); if(go){e.preventDefault(); if(VIEWS[go.dataset.go]){tab=go.dataset.go; renderTabs(); render(); scrollTo(0,0);} return;}
+  const go=e.target.closest("[data-go]"); if(go){e.preventDefault(); if(VIEWS[go.dataset.go]){tab=go.dataset.go; renderTabs(); render(); const a=go.dataset.anchor&&document.getElementById(go.dataset.anchor); if(a) a.scrollIntoView({block:"start"}); else scrollTo(0,0);} return;}
   const tk=e.target.closest("[data-tlk]"); if(tk){const id=tk.dataset.tlk; rmOpen.has(id)?rmOpen.delete(id):rmOpen.add(id); render(); document.querySelector(`[data-tlk="${id}"]`)?.focus({preventScroll:true}); return;}
   const ta=e.target.closest("[data-tlall]"); if(ta){const gs=rmInit==="both"?["G2.2","G3.1"]:[rmInit]; PLAN.K.filter(k=>gs.includes(k.g)).forEach(k=>ta.dataset.tlall==="open"?rmOpen.add(k.id):rmOpen.delete(k.id)); render(); return;}
   const cp=e.target.closest("[data-copy]"); if(cp){const el=document.getElementById(cp.dataset.copy); const v=el.value; try{navigator.clipboard.writeText(v).then(()=>toast("Copied"),()=>{el.select();toast("Selected; press Cmd+C to copy");});}catch(_){el.select();toast("Selected; press Cmd+C to copy");} return;}
