@@ -24,7 +24,7 @@ WORKBOOK = "Strategic Plan working details - G2.2 and G3.1.xlsx"
 GAP_PDF = "Curriculum Gap Report - Phases 1 and 2 - October 2026.pdf"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-GAP_FIELDS = ("topic", "area", "type", "route", "priority", "evidence", "decision", "owner", "notes", "order", "_id")
+GAP_FIELDS = ("topic", "area", "type", "route", "priority", "tier_label", "usmle", "basis", "evidence", "decision", "owner", "notes", "order", "_id")
 MS_FIELDS = ("kpi", "due", "title", "done_when", "status", "owner", "seq", "_id")
 SHEETS = {
     "Members": ("members", [("initiative", "Initiative"), ("kind", "Role in this work"), ("name", "Name"), ("role", "Title"),
@@ -116,8 +116,10 @@ def main():
     public = {"generated": data.get("generated", ""),
               "gaps": [{k: g[k] for k in GAP_FIELDS if k in g} for g in data["gaps"]],
               "milestones": [{k: m[k] for k in MS_FIELDS if k in m} for m in data["milestones"]],
-              "emerging": [{k: e[k] for k in ("topic", "why", "strength", "status", "order", "_id") if k in e} for e in data.get("emerging", [])],
-              "links": [{k: l[k] for k in ("name", "kind", "date", "url", "format", "note") if k in l} for l in links if l.get("url")]}
+              "emerging": [{k: e[k] for k in ("topic", "why", "strength", "status", "pilot", "order", "_id") if k in e} for e in data.get("emerging", [])],
+              "links": [{k: l[k] for k in ("name", "kind", "date", "url", "format", "note") if k in l} for l in links if l.get("url")],
+              # timelines, rules, criteria and resources from the co-leads' working doc (no names or emails)
+              "workdoc": data.get("workdoc", {})}
     blob = json.dumps(public, ensure_ascii=False)
     for bad in ("@mssm.edu", "@mountsinai.org", "/files/", "/docs/"):
         if bad in blob: sys.exit(f"public data still contains {bad!r}; it belongs in the working files, not the public site")
