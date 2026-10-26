@@ -1,4 +1,4 @@
-"""One-off (2026-10-25, co-leads): G2.2 KPI wording revised to match the milestones. Keeps the Oct 14 workbook wording
+"""One-off (2026-10-25, co-leads): G2.2 and G3.1 KPI wording revised to match the milestones. Keeps the Oct 14 workbook wording
 in `wb` (shown under the new text) until the plan's Change Log approves the revision with the charter (Nov 13).
 Edits the embedded PLAN data in index.html. Run from the repo root: python3 tools/kpi_revisions_g22.py"""
 import json, re
@@ -11,6 +11,10 @@ REV = {
    "Establish an Annual Curriculum Gap Report, presented to the EEC at its March 5, 2027 meeting, that identifies curriculum gaps across student surveys, assessment outcomes, the AAMC SCOPE survey, the curriculum map database and the LCME Standard 7 coverage check, with its sections reviewed by PCCS, CCS and CIS."),
  "G2.2-K4": ("Gap Closure Tracking",
    "Use the Annual Curriculum Gap Report to track the gaps the EEC designates Address: 100% of Address gaps closed by their target dates, beginning Year 2, with a baseline at the May 2027 Annual Review."),
+  "G3.1-K1": ("Draft Framework",
+   "By January 31, 2027, complete the initial draft of the emerging healthcare competency framework for the topics that pass the gap test (practice moving ahead of any settled expectation): competencies by phase that sit above the G2.2 floor, built from current teaching and the faculty champions already leading it across the AOCs."),
+ "G3.1-K2": ("Stakeholder Sign-Off",
+   "Complete a formal EEC review of the framework at its May 7, 2027 meeting, after review by the faculty champions and Mount Sinai health-system innovation representatives (February) and a CIS pre-review at its April 15 meeting."),
 }
 NOTE = "Wording revised Oct 25, 2026 by the co-leads to match the milestones; goes to the plan's Change Log with the charter (Nov 13)."
 p = "index.html"; s = open(p, encoding="utf-8").read()
