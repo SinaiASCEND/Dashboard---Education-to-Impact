@@ -744,12 +744,12 @@ renderTabs(); render();
   }
   function open(url,label){
     let host=""; try{host=new URL(url).hostname.replace(/^www\./,"")}catch(_){}
-    const own=/\/files\/[\w.-]+\.pdf$/.test(url); if(own) host="PDF stored with this dashboard"; if(!own&&url.startsWith(location.origin+"/docs/")) host="Document on this dashboard";
+    const own=/\/files\/[\w.-]+\.pdf$/.test(url); if(own) host="PDF stored with this dashboard"; if(!own&&url.startsWith(new URL("docs/",location.href).href)) host="Document on this dashboard";
     document.getElementById("lpTitle").textContent=(label||host||"Link").replace(/\s*↗$/,"");
     document.getElementById("lpHost").textContent=host;
     full.href=url;
     const framed=own||!NO_FRAME.test(host);
-    document.getElementById("lpHint").hidden=!framed||own;
+    document.getElementById("lpHint").hidden=!framed||own||host==="Document on this dashboard";
     if(own){ renderPdf(url); lp.classList.add("open"); lp.setAttribute("aria-hidden","false"); full.focus(); return; }
     body.innerHTML=framed?`<iframe src="${e(url)}" title="Preview" referrerpolicy="no-referrer"></iframe>`
       :`<div class="lp-n"><b>This page opens in its own tab.</b><span class="small muted">${e(host)} doesn’t allow previews inside other pages, so use <b>Open fully ↗</b> (you may need to be signed in to your Mount Sinai account).</span><code>${e(url)}</code></div>`;
@@ -760,10 +760,10 @@ renderTabs(); render();
   document.addEventListener("keydown",ev=>{ if(ev.key==="Escape"&&lp.classList.contains("open")) close(); });
   // The page wrapper opens new-tab links itself, so outside links become in-page links that open this panel.
   function convert(root){
-    (root.querySelectorAll?root:document).querySelectorAll('a[href^="http"], a[href^="/files/"], a[href^="/docs/"]').forEach(a=>{
+    (root.querySelectorAll?root:document).querySelectorAll('a[href^="http"], a[href^="/files/"], a[href^="/docs/"], a[href^="docs/"]').forEach(a=>{
       if(a.closest(".ascend-mast")||a.closest("#lp")) return;
       // PDFs and documents served by this site preview in the panel.
-      if(/^\/(files|docs)\//.test(a.getAttribute("href"))){ a.dataset.ext=new URL(a.getAttribute("href"),location.href).href; a.setAttribute("href","#"); a.removeAttribute("target"); a.title="Opens in a side panel"; return; }
+      if(/^\/?(files|docs)\//.test(a.getAttribute("href"))){ a.dataset.ext=new URL(a.getAttribute("href"),location.href).href; a.setAttribute("href","#"); a.removeAttribute("target"); a.title="Opens in a side panel"; return; }
       // Sites that refuse previews (claude.ai, Outlook, SharePoint, Teams…) skip the panel and open in a new tab in one click.
       let h=""; try{h=new URL(a.getAttribute("href")).hostname}catch(_){}
       if(NO_FRAME.test(h)){ a.target="_blank"; a.rel="noopener"; a.title=a.title||"Opens in a new tab"; return; }
