@@ -439,7 +439,6 @@ function goalCard(gid){
 function kpiRow(k){
   const s=kpiStatus(k.id);
   return `<div class="kpi"><div style="min-width:0"><p><span class="mono">${k.id}</span> <b>${esc(k.name)}</b></p><p class="muted">${esc(k.text)}</p>
-    ${k.wb?`<p class="small muted">Workbook wording (Oct 14${k.wbName&&k.wbName!==k.name?`, "${esc(k.wbName)}"`:""}): ${esc(k.wb)}</p>`:""}
     ${k.issue?`<p class="issue">${k.wb?"":"Open issue: "}${esc(k.issue)}</p>`:""}
     ${s.current||s.note?`<p class="small"><b>Update:</b> ${esc([s.current,s.note].filter(Boolean).join(" — "))}</p>`:""}
     ${msSummary(k.id)}</div>
