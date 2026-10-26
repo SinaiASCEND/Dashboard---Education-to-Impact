@@ -86,6 +86,17 @@
   .ascend-mast .am-logo{opacity:.3}
 }
 body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);margin:0}
+/* Working-group buttons under the masthead */
+.gbar{background:var(--surface);border-bottom:1px solid var(--line)}
+.gbar-in{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-block:16px}
+.gbtn{display:grid;gap:3px;text-align:left;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px 20px;min-height:84px;cursor:pointer;box-shadow:inset 5px 0 0 var(--accent);min-width:0}
+.gbtn:hover{border-color:var(--accent)}
+.gbtn .gid{font:700 12px/1 var(--mono);letter-spacing:.06em;color:var(--accent)}
+.gbtn b{font:700 21px/1.2 var(--display);color:var(--navy)}
+.gbtn .gsub{font-size:13px;color:var(--muted)}
+.gbtn[aria-current="page"]{background:var(--navy);border-color:var(--navy)}
+.gbtn[aria-current="page"] b,.gbtn[aria-current="page"] .gsub,.gbtn[aria-current="page"] .gid{color:var(--surface)}
+@media (max-width:640px){.gbar-in{grid-template-columns:1fr;gap:8px;padding-block:10px}.gbtn{min-height:64px;padding:12px 16px}.gbtn b{font-size:17px}}
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .eyebrow{font:600 11px/1.3 var(--body);letter-spacing:.14em;text-transform:uppercase;opacity:.8}
 .am-nav button:focus-visible,.am-hub:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
@@ -133,7 +144,9 @@ details.pri[open]>summary{border-bottom:1px solid var(--line)}
 .kpi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;padding:10px 12px;background:var(--sunk);border-radius:6px}
 .kpi p{margin:0;font-size:13.5px}
 .issue{color:var(--warn);font-size:12.5px}
-.tlg{padding:4px 14px 8px}
+.tlg{padding:4px 14px 8px;background:color-mix(in srgb,var(--cyan) 9%,var(--surface));border-color:color-mix(in srgb,var(--cyan) 28%,var(--line))}
+.tlg .tltoday{background:transparent}
+.rmdetail{box-shadow:inset 4px 0 0 var(--accent)}
 .tlr{display:grid;grid-template-columns:minmax(150px,250px) minmax(0,1fr);align-items:center;border-bottom:1px solid var(--line);min-height:46px}
 .tlr:last-child{border-bottom:0}
 .tll{padding:7px 12px 7px 0;font-size:13px;line-height:1.3;min-width:0}
@@ -215,6 +228,7 @@ dialog input,dialog select{width:100%}
   <div class="am-util"><div class="in"><nav class="am-nav" role="tablist" id="tabs" aria-label="Dashboard sections"></nav></div></div>
   <div class="am-stripe"><i></i><i></i><i></i></div>
 </header>
+<nav class="gbar" id="gbar" aria-label="Working groups"></nav>
 <script src="data/e2i-data.js"></script>
 
 <main><div class="wrap" id="view"></div><div class="wrap"><p class="note" id="dataAsOf" style="padding-block:0 28px"></p></div></main>
@@ -314,13 +328,14 @@ const SCHEMAS = {
 const state = {db:null, actions:[], meetings:[], gaps:[], emerging:[], materials:[], milestones:[], members:[], minutes:[], outbox:[], links:[], kpis:{}, loaded:false, writable:false};
 let tab = "overview";
 const TAB_GROUPS = [
-  ["Both groups",[["overview","Overview"],["plan","Plan & KPIs"],["teams","Year 1 teams"],["files","Shared files"]]],
-  ["G2.2",[["g22","Curriculum Gap Working Group"]]],
-  ["G3.1",[["g31","Emerging Topics Working Group"]]]];
+  ["Both groups",[["overview","Overview"],["plan","Plan & KPIs"],["teams","Year 1 teams"],["files","Shared files"]]]];
+// The two working groups are the big buttons under the masthead, not tabs in its nav row.
+const GROUP_BTNS = [["g22","G2.2","Curriculum Gap Working Group","Curriculum Content Gap Closure"],
+                    ["g31","G3.1","Emerging Topics Working Group","Emerging Healthcare Competency Framework"]];
 const GROUP_TAB = {"G2.2":"g22","G3.1":"g31"};
 // Which group a SharePoint file belongs to; files for neither are shared (the working details workbook, Steering Committee papers).
 const groupOf = l => /^G2\.2\b|Gap Report/i.test(l.name||"") ? "G2.2" : /^G3\.1\b/i.test(l.name||"") ? "G3.1" : "";
-const TABS = TAB_GROUPS.flatMap(([,t])=>t);
+const TABS = TAB_GROUPS.flatMap(([,t])=>t).concat(GROUP_BTNS.map(([k,,l])=>[k,l]));
 
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = d => { if(!d) return "—"; const x=new Date(d+"T12:00:00"); return isNaN(x)?esc(d):x.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); };
@@ -344,8 +359,11 @@ function toast(msg){const t=document.getElementById("toast"); t.textContent=msg;
 function renderTabs(){
   const nav=document.getElementById("tabs");
   nav.innerHTML=TAB_GROUPS.map(([g,t])=>`<div class="am-grp" role="presentation"><small aria-hidden="true">${g}</small><div role="presentation">${t.map(([k,l])=>`<button role="tab" aria-selected="${k===tab}" data-tab="${k}">${l}</button>`).join("")}</div></div>`).join("");
+  document.getElementById("gbar").innerHTML=`<div class="wrap gbar-in">${GROUP_BTNS.map(([k,id,name,init])=>`<button class="gbtn" data-tab="${k}" aria-current="${k===tab?"page":"false"}"><span class="gid">${id}</span><b>${name}</b><span class="gsub">${init}</span></button>`).join("")}</div>`;
 }
-document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]"); if(!b) return; tab=b.dataset.tab; try{localStorage.setItem("fei-tab",tab)}catch(_){} renderTabs(); render(); });
+const pickTab=e=>{const b=e.target.closest("[data-tab]"); if(!b) return; tab=b.dataset.tab; try{localStorage.setItem("fei-tab",tab)}catch(_){} renderTabs(); render(); };
+document.getElementById("tabs").addEventListener("click",pickTab);
+document.getElementById("gbar").addEventListener("click",pickTab);
 
 function storeNote(){
   if(state.loaded) return "";
@@ -450,8 +468,14 @@ function gTimeline(gid){
   <div class="tablebox"><table><thead><tr><th>When</th><th>What happens</th><th>Who</th><th>KPI</th></tr></thead><tbody>
   ${t.rows.map(r=>`<tr><td class="num">${esc(r[0])}</td><td style="min-width:260px">${esc(r[1])}</td><td class="small">${esc(r[2])}</td><td class="small" style="white-space:nowrap">${kpiLinks(gid,r[3])}</td></tr>`).join("")}</tbody></table></div>`;
 }
+const rmSel={};   // roadmap: the KPI whose milestones show below the chart, per group
 function gRoadmap(gid){
-  return `<p class="small muted" style="margin:0">October 2026 – May 2027. Select a row to see its milestones.</p>${state.loaded?timelineSvg([gid]):storeNote()}`;
+  if(!state.loaded) return storeNote();
+  const ids=PLAN.K.filter(k=>k.g===gid).map(k=>k.id);
+  if(!ids.includes(rmSel[gid])) rmSel[gid]=ids[0];
+  const d=PANELS.kpi(rmSel[gid],true);
+  return `<p class="small muted" style="margin:0">October 2026 – May 2027. Select a row to see its milestones below.</p>${timelineSvg([gid])}
+  ${d?`<section class="card rmdetail grid" id="rmdetail" style="gap:12px" aria-live="polite"><h3 style="font:700 18px/1.25 var(--display)">${esc(d.title)}</h3>${d.html}</section>`:""}`;
 }
 function gDocs(gid){
   return `<p class="small muted" style="margin:0">Open in SharePoint with a Mount Sinai sign-in. Members, actions, meetings and minutes for both groups are in the working details workbook on <a href="#files" data-go="files">Shared files</a>.</p>${groupFiles(gid)}`;
@@ -496,8 +520,9 @@ function timelineSvg(gs){
     ${months.map(m=>`<span class="tlmo" style="left:${p(m)}%">${new Date(m+"T12:00:00").toLocaleDateString(undefined,{month:"short"})}</span>`).join("")}
     <span class="tltoday" style="left:${p(TODAY)}%">Today</span></div></div>`;
   const fillOf=m=>`background:${col[m.status]||col["Not started"]};color:${m.status==="Done"||m.status==="In progress"?"var(--surface)":"var(--navy)"}`;
-  const rows=kpis.map(k=>{const ms=msFor(k.id), end=[k.due,...ms.map(m=>m.due)].sort().pop(); return `<div class="tlrow">
-    <div class="tlr" role="button" tabindex="0" data-panel="kpi:${k.id}" aria-label="${esc(k.id+" "+k.name+": show milestones")}"><div class="tll"><span class="chev" aria-hidden="true">▸</span><span class="mono">${k.id}</span> <span class="nm">${esc(k.name)}</span> <span class="small muted">(${ms.filter(m=>m.status==="Done").length}/${ms.length})</span></div><div class="tlt">${grid}
+  const sel=rmSel[gs[0]];
+  const rows=kpis.map(k=>{const ms=msFor(k.id), end=[k.due,...ms.map(m=>m.due)].sort().pop(); return `<div class="tlrow ${k.id===sel?"open":""}">
+    <div class="tlr" role="button" tabindex="0" data-rmsel="${k.id}" aria-pressed="${k.id===sel}" aria-label="${esc(k.id+" "+k.name+": show milestones below")}"><div class="tll"><span class="chev" aria-hidden="true">▸</span><span class="mono">${k.id}</span> <span class="nm">${esc(k.name)}</span> <span class="small muted">(${ms.filter(m=>m.status==="Done").length}/${ms.length})</span></div><div class="tlt">${grid}
     ${ms.length?`<i class="tln" style="left:${p(ms[0].due)}%;width:${Math.max(0,p(end)-p(ms[0].due))}%"></i>`:""}
     ${ms.map((m,j)=>`<b class="tlm" title="${esc(fmt(m.due)+": "+m.title+" ("+(m.status||"Not started")+")")}" style="left:${p(m.due)}%;${fillOf(m)}">${j+1}</b>`).join("")}
     <b class="tlk" title="${esc(k.id+" end target: "+(k.doneBy||fmt(end)))}" style="left:${p(end)}%"></b></div></div></div>`;}).join("");
@@ -532,9 +557,10 @@ function emergingList(){
 /* ---------- details side panel ---------- */
 let panel=null;
 const dl = pairs => `<dl class="dl">${pairs.filter(([,v])=>v).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>`;
-function stepper(kind,ids,cur,label){
+function stepper(kind,ids,cur,label,inline){
   const i=ids.indexOf(cur); if(i<0) return "";
-  return `<div class="row spread small ipnav">${i>0?`<button class="btn" data-panel="${kind}:${ids[i-1]}">← Previous ${label}</button>`:"<span></span>"}<span class="muted tnum">${i+1} of ${ids.length}</span>${i<ids.length-1?`<button class="btn" data-panel="${kind}:${ids[i+1]}">Next ${label} →</button>`:"<span></span>"}</div>`;
+  const at=id=>inline?`data-rmsel="${id}"`:`data-panel="${kind}:${id}"`;   // inline: the roadmap's detail below the chart
+  return `<div class="row spread small ipnav">${i>0?`<button class="btn" ${at(ids[i-1])}>← Previous ${label}</button>`:"<span></span>"}<span class="muted tnum">${i+1} of ${ids.length}</span>${i<ids.length-1?`<button class="btn" ${at(ids[i+1])}>Next ${label} →</button>`:"<span></span>"}</div>`;
 }
 const table = (head,rows) => `<div class="tablebox"><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 const PLAN_FIT = `<p class="small" style="margin:0">Priorities set direction, goals define success, initiatives do the work. Each working group owns one initiative and is measured by the key performance indicators on its goal. Key performance indicator (KPI) IDs read <span class="mono">G2.2-K3</span> = third key performance indicator of goal G2.2.</p>
@@ -577,13 +603,13 @@ const PANELS={
       ${dl([["Tier",esc(r.tier_label||TIER_LABEL[tierOf(r)])],["USMLE (2026 outlines)",esc(r.usmle)],["Route",esc(r.route)],["Basis",esc(r.basis)],["Area",esc(r.area)],["Type",esc(r.type)],["Evidence",esc(r.evidence)],["Notes",esc(r.notes)],["Owner",esc(r.owner)]])}
       <div class="row small" style="gap:6px"><button class="btn" data-panel="rule:tiers">Priority tiers</button><button class="btn" data-panel="rule:usmle">USMLE rule</button><button class="btn" data-panel="rule:routing">Routing order</button><button class="btn" data-panel="rule:decisions">Decision definitions</button></div>
       ${stepper("gap",list,id,"gap")}`}; },
-  kpi(id){ const k=PLAN.K.find(x=>x.id===id); if(!k) return null;
+  kpi(id,inline){ const k=PLAN.K.find(x=>x.id===id); if(!k) return null;
     const ms=msFor(id), gid=k.g, key=id.split("-").pop(), steps=((WD().timeline||{})[gid]?.rows||[]).filter(r=>new RegExp("\\b"+key+"\\b").test(r[3]));
     return {title:`${k.id} ${k.name}`,sub:GROUP_NAME[gid]||GOAL[gid]?.init||"",html:`<p style="margin:0">${esc(k.text)}</p>
       ${dl([["Done by",esc(k.doneBy||fmt(k.due))],["Status",esc(kpiStatus(id).status||"Not started")],["Note",esc(k.issue||"")]])}
       ${ms.length?`<h3>Milestones</h3><div class="tablebox"><table><thead><tr><th class="num">#</th><th>Target</th><th>Milestone</th><th>Done when</th><th>Status</th></tr></thead><tbody>${ms.map((m,i)=>`<tr><td class="num">${i+1}</td><td class="num">${fmt(m.due)}</td><td>${esc(m.title)}</td><td class="small">${esc(m.done_when)}</td><td>${statusPill(m.status||"Not started")}</td></tr>`).join("")}</tbody></table></div>`:""}
       ${steps.length?`<h3>Timeline steps</h3>${table(["When","What happens","Who"],steps.map(r=>r.slice(0,3)))}`:""}
-      ${stepper("kpi",PLAN.K.filter(x=>x.g===gid).map(x=>x.id),id,"KPI")}`}; },
+      ${stepper("kpi",PLAN.K.filter(x=>x.g===gid).map(x=>x.id),id,"KPI",inline)}`}; },
   crit(i){ const rows=WD().criteria?.rows||[], r=rows[+i]; if(!r) return null;
     return {title:r[0],sub:`Criterion ${+i+1} of ${rows.length} · G3.1 evaluative framework`,
       html:dl([["Question it answers",esc(r[1])],["Evidence",esc(r[2])],["Who supplies it",esc(r[3])],["Outcome or deliverable",esc(r[4])]])+stepper("crit",rows.map((_,j)=>String(j)),String(i),"criterion")}; },
@@ -727,6 +753,7 @@ function render(){ document.getElementById("view").innerHTML=(state.loaded&&!/^g
 
 /* ---------- interactions ---------- */
 document.getElementById("view").addEventListener("click",e=>{
+  const rs=e.target.closest("[data-rmsel]"); if(rs){e.preventDefault(); const fromChart=!!rs.closest(".tlg"); rmSel[rmInit]=rs.dataset.rmsel; render(); const d=document.getElementById("rmdetail"); if(fromChart&&d&&d.getBoundingClientRect().top>innerHeight) d.scrollIntoView({behavior:"smooth",block:"nearest"}); return;}
   const pn=e.target.closest("[data-panel]"); if(pn){e.preventDefault(); openPanel(pn.dataset.panel); return;}
   const sb=e.target.closest("[data-sub]"); if(sb){e.preventDefault(); const [g,k]=sb.dataset.sub.split(":"); sub[g]=k; try{localStorage.setItem("fei-sub",JSON.stringify(sub))}catch(_){} if(tab!==GROUP_TAB[g]){tab=GROUP_TAB[g]; renderTabs();} render(); const n=document.querySelector(".subnav"); if(n&&n.getBoundingClientRect().top<0) n.scrollIntoView({block:"start"}); return;}
   const gt=e.target.closest("[data-gtier]"); if(gt){gapTier=gt.dataset.gtier; render(); return;}
@@ -764,7 +791,7 @@ async function queueMail(){
   try{ await state.db.collection("outbox").add({to,subject,body,count:to.length,audience:mailAud,status:"Queued",created:new Date().toISOString()}); toast("Saved to the queue."); }
   catch(err){ handleWriteError(err); }
 }
-document.getElementById("view").addEventListener("keydown",e=>{const tk=e.target.closest?.("[data-tlk],tr[data-panel],div[data-panel][role=button]"); if(tk&&(e.key==="Enter"||e.key===" ")){e.preventDefault(); tk.click();}});
+document.getElementById("view").addEventListener("keydown",e=>{const tk=e.target.closest?.("[data-tlk],tr[data-panel],div[data-panel][role=button],div[data-rmsel][role=button]"); if(tk&&(e.key==="Enter"||e.key===" ")){e.preventDefault(); tk.click();}});
 window.addEventListener("hashchange",()=>{ if(fromHash()){ renderTabs(); render(); } });
 async function save(kind,id,patch,merge){
   try{ const ref=state.db.collection(kind).doc(id||undefined);
