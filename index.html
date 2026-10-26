@@ -530,10 +530,19 @@ function timelineSvg(gs){
   <div class="row small muted" style="gap:14px"><span class="row" style="gap:5px"><i style="width:10px;height:10px;border-radius:50%;border:1.5px solid var(--navy);display:inline-block"></i>Milestone (number = stage)</span><span class="row" style="gap:5px"><i style="width:10px;height:10px;background:var(--accent);transform:rotate(45deg);display:inline-block"></i>Key performance indicator end target</span><span>Filled: done (green) or in progress (blue)</span></div>`;
 }
 /* ---------- gap register and pilot topics ---------- */
-let gapTier="all", gapRoute="all";
+let gapTier="all", gapRoute="all", gapSort={key:"order",dir:1};
+// Sort keys for the register's column headers; ties keep register order.
+const GAP_SORT={order:r=>r.order??99, topic:r=>String(r.topic||"").toLowerCase(), tier:r=>({"1":1,"2":2,"Monitor":3})[tierOf(r)],
+  usmle:r=>usmleShort(r.usmle).toLowerCase(), route:r=>String(r.route||"").toLowerCase(),
+  decision:r=>["Pending","Address","Defer","Monitor"].indexOf(r.decision||"Pending")};
 function gapRows(){
-  return state.gaps.slice().sort((a,b)=>(a.order??99)-(b.order??99))
+  const f=GAP_SORT[gapSort.key]||GAP_SORT.order;
+  return state.gaps.slice().sort((a,b)=>{const x=f(a), y=f(b); return (x<y?-1:x>y?1:0)*gapSort.dir||(a.order??99)-(b.order??99);})
     .filter(r=>(gapTier==="all"||tierOf(r)===gapTier)&&(gapRoute==="all"||String(r.route||"").includes(gapRoute)));
+}
+function sortTh(key,label,num){
+  const on=gapSort.key===key, dir=on?(gapSort.dir>0?"ascending":"descending"):"none";
+  return `<th class="${num?"num":""}" aria-sort="${dir}"><button class="sorth" data-gsort="${key}" title="Sort by ${label}">${label}<span aria-hidden="true">${on?(gapSort.dir>0?"▲":"▼"):"↕"}</span></button></th>`;
 }
 function gapRegister(){
   if(!state.loaded) return storeNote();
@@ -542,7 +551,7 @@ function gapRegister(){
   return `<p class="small muted" style="margin:0;max-width:85ch">G2.2-K1: every gap gets an EEC decision in two rounds, the 12 Standard 7 gaps by Dec 31, 2026 and the other 21 at the Mar 5, 2027 EEC meeting. Select a gap to see its evidence, USMLE alignment and route.</p>
   <div class="row spread"><div class="filters" role="group" aria-label="Filter by tier">${tiers.map(([k,l,n])=>`<button class="seg" aria-pressed="${gapTier===k}" data-gtier="${k}">${l} <span class="tnum">${n}</span></button>`).join("")}</div>
    <label class="row small" style="gap:6px">Route <select id="fRoute">${["all","PCCS","CCS","CIS","Clinical Competency"].map(o=>`<option value="${o}" ${gapRoute===o?"selected":""}>${o==="all"?"All routes":o}</option>`).join("")}</select></label></div>
-  <div class="tablebox"><table><thead><tr><th class="num">#</th><th>Gap</th><th>Tier</th><th>USMLE</th><th>Route</th><th>EEC decision</th></tr></thead><tbody>
+  <div class="tablebox"><table><thead><tr>${sortTh("order","#",true)}${sortTh("topic","Gap")}${sortTh("tier","Tier")}${sortTh("usmle","USMLE")}${sortTh("route","Route")}${sortTh("decision","EEC decision")}</tr></thead><tbody>
   ${rows.length?rows.map(r=>`<tr class="click" tabindex="0" data-panel="gap:${r._id}"><td class="num">${r.order}</td><td style="min-width:200px"><b>${esc(r.topic)}</b></td><td>${tierPill(tierOf(r))}</td><td class="small">${esc(usmleShort(r.usmle))}</td><td class="small">${esc(r.route||"—")}</td><td>${statusPill(r.decision||"Pending")}</td></tr>`).join(""):`<tr><td colspan="6" class="muted">No gaps match these filters.</td></tr>`}</tbody></table></div>
   <div class="small muted">EEC decisions: ${["Pending","Address","Defer","Monitor"].map(s=>`${s} <b class="tnum">${dec(s)}</b>`).join(" · ")}</div>`;
 }
@@ -757,6 +766,7 @@ document.getElementById("view").addEventListener("click",e=>{
   const pn=e.target.closest("[data-panel]"); if(pn){e.preventDefault(); openPanel(pn.dataset.panel); return;}
   const sb=e.target.closest("[data-sub]"); if(sb){e.preventDefault(); const [g,k]=sb.dataset.sub.split(":"); sub[g]=k; try{localStorage.setItem("fei-sub",JSON.stringify(sub))}catch(_){} if(tab!==GROUP_TAB[g]){tab=GROUP_TAB[g]; renderTabs();} render(); const n=document.querySelector(".subnav"); if(n&&n.getBoundingClientRect().top<0) n.scrollIntoView({block:"start"}); return;}
   const gt=e.target.closest("[data-gtier]"); if(gt){gapTier=gt.dataset.gtier; render(); return;}
+  const gs=e.target.closest("[data-gsort]"); if(gs){const k=gs.dataset.gsort; gapSort=gapSort.key===k?{key:k,dir:-gapSort.dir}:{key:k,dir:1}; render(); document.querySelector(`[data-gsort="${k}"]`)?.focus({preventScroll:true}); return;}
   const jp=e.target.closest("[data-jump]"); if(jp){e.preventDefault(); document.getElementById(jp.dataset.jump)?.scrollIntoView({behavior:"smooth",block:"start"}); return;}
   const go=e.target.closest("[data-go]"); if(go){e.preventDefault(); if(VIEWS[go.dataset.go]){tab=go.dataset.go; renderTabs(); render(); const a=go.dataset.anchor&&document.getElementById(go.dataset.anchor); if(a) a.scrollIntoView({block:"start"}); else scrollTo(0,0);} return;}
   const tk=e.target.closest("[data-tlk]"); if(tk){const id=tk.dataset.tlk; rmOpen.has(id)?rmOpen.delete(id):rmOpen.add(id); render(); document.querySelector(`[data-tlk="${id}"]`)?.focus({preventScroll:true}); return;}
@@ -878,6 +888,9 @@ renderTabs(); render();
 .subnav button[aria-selected="true"]{color:var(--surface);background:var(--navy);border-color:var(--navy)}
 button.seg{font:600 13px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;min-height:36px}
 button.seg[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.sorth{all:unset;cursor:pointer;display:inline-flex;gap:5px;align-items:center;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit}
+.sorth span{font-size:9px;opacity:.55} th[aria-sort="ascending"] .sorth,th[aria-sort="descending"] .sorth{color:var(--navy)} th[aria-sort="ascending"] .sorth span,th[aria-sort="descending"] .sorth span{opacity:1}
+.sorth:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 tr.click{cursor:pointer} tr.click:hover td{background:var(--sunk)} tr.click:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
 .rulecard{display:grid;gap:6px;text-align:left;font:inherit;color:var(--fg);cursor:pointer;align-content:start;width:100%}
 .rulecard:hover{border-color:var(--accent)} .rulecard b{font:700 15px/1.3 var(--body);color:var(--navy)} .rulecard .go{color:var(--accent);font-weight:600}
