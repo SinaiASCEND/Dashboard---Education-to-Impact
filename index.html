@@ -561,7 +561,16 @@ function emergingList(){
   return `<p class="small muted" style="margin:0;max-width:85ch">Candidate topics for the January pilot of the evaluative framework (three to five). <a href="#" data-panel="rule:two">The two-question rule</a></p>
   <div class="tablebox"><table><thead><tr><th>Topic</th><th>Why it would be emerging</th><th>Mount Sinai strength</th><th>Status</th><th>Pilot</th></tr></thead><tbody>
   ${rows.map(r=>`<tr><td style="min-width:200px"><b>${esc(r.topic)}</b></td><td class="small" style="min-width:240px">${esc(r.why)}</td><td class="small">${esc(r.strength||"—")}</td><td>${statusPill(r.status||"")}</td><td>${esc(r.pilot||"—")}</td></tr>`).join("")}</tbody></table></div>
-  ${other.length?`<h3>Other possible topics</h3><div class="tablebox"><table><thead><tr><th>Topic</th><th>Source</th><th>Note</th></tr></thead><tbody>${other.map(r=>`<tr><td style="min-width:180px"><b>${esc(r[0])}</b></td><td class="small">${esc(r[1])}</td><td class="small">${esc(r[2])}</td></tr>`).join("")}</tbody></table></div>`:""}`;
+  ${other.length?`<h3>Other possible topics</h3><div class="tablebox"><table><thead><tr><th>Topic</th><th>Source</th><th>Note</th></tr></thead><tbody>${other.map(r=>`<tr><td style="min-width:180px"><b>${esc(r[0])}</b></td><td class="small">${esc(r[1])}</td><td class="small">${esc(r[2])}</td></tr>`).join("")}</tbody></table></div>`:""}
+  ${aamcSeries()}`;
+}
+// AAMC New and Emerging Areas in Medicine competency series: where each set sits under the two-question rule.
+function aamcSeries(){
+  const s=WD().aamc_series; if(!s) return "";
+  return `<h3>AAMC competency series: New and Emerging Areas in Medicine</h3>
+  <p class="small muted" style="margin:0;max-width:85ch">${esc(s.intro)} <a href="${esc(s.series_url)}" target="_blank" rel="noopener">AAMC series page</a> · checked ${fmt(s.checked)}.</p>
+  <div class="tablebox"><table><thead><tr><th>Competency set</th><th>Published</th><th>What it covers</th><th>Home on this dashboard</th></tr></thead><tbody>
+  ${s.rows.map(r=>`<tr><td style="min-width:200px"><b><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.set)}</a></b></td><td class="small" style="white-space:nowrap">${esc(r.published)}</td><td class="small" style="min-width:260px">${esc(r.scope)}</td><td class="small" style="min-width:200px">${esc(r.home)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 /* ---------- details side panel ---------- */
 let panel=null;
