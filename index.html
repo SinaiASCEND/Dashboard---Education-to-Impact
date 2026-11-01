@@ -639,8 +639,8 @@ function drawPanel(){
   document.getElementById("ipTitle").textContent=r.title; document.getElementById("ipSub").textContent=r.sub||"";
   document.getElementById("ipBody").innerHTML=r.html; return true;
 }
-// Phones: the details open in the page (above the content, scrolling with it), not as an overlay with its own scroll.
-const inlinePanel=()=>matchMedia("(max-width:700px)").matches;
+// The details open in the page (above the content, scrolling with it) at every screen size, never as a side overlay with its own scroll box.
+const inlinePanel=()=>true;
 let panelFromY=0;
 function openPanel(spec){
   const i=spec.indexOf(":"), wasOpen=!!panel; panel=[spec.slice(0,i),spec.slice(i+1)];
@@ -916,14 +916,13 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--sunk)} tr.click:focu
 .ip{z-index:59;width:min(640px,100vw)}
 .ip-b{flex:1;overflow:auto;padding:18px;display:grid;gap:14px;align-content:start}
 #ipSlot:empty{display:none}
-@media (max-width:700px){
-  #ipSlot{padding-block:14px 0}
-  #ipSlot .ip{position:static;transform:none;width:auto;height:auto;box-shadow:none;border:1px solid var(--line);border-radius:8px;box-shadow:inset 4px 0 0 var(--accent);padding-top:0;display:none}
-  #ipSlot .ip.open{display:flex}
-  #ipSlot .ip-b{overflow:visible;padding:14px}
-  #ipSlot .lp-t b{white-space:normal}
-  #ipSlot .lp-t span{white-space:normal}
-}
+/* Details panel always sits in the page flow (no inner scroll box), at every screen size */
+#ipSlot{padding-block:14px 0}
+#ipSlot .ip{position:static;transform:none;width:auto;height:auto;box-shadow:none;border:1px solid var(--line);border-radius:8px;box-shadow:inset 4px 0 0 var(--accent);padding-top:0;display:none}
+#ipSlot .ip.open{display:flex}
+#ipSlot .ip-b{overflow:visible;padding:14px}
+#ipSlot .lp-t b{white-space:normal}
+#ipSlot .lp-t span{white-space:normal}
 .dl{display:grid;grid-template-columns:minmax(110px,170px) minmax(0,1fr);gap:8px 14px;margin:0;font-size:13.5px}
 .dl dt{color:var(--muted);font-weight:600} .dl dd{margin:0}
 .ipnav{border-top:1px solid var(--line);padding-top:12px}
