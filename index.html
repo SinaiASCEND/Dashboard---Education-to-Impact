@@ -328,7 +328,7 @@ const SCHEMAS = {
 const state = {db:null, actions:[], meetings:[], gaps:[], emerging:[], materials:[], milestones:[], members:[], minutes:[], outbox:[], links:[], kpis:{}, loaded:false, writable:false};
 let tab = "overview";
 const TAB_GROUPS = [
-  ["Both groups",[["overview","Overview"],["plan","Plan & KPIs"],["teams","Year 1 teams"],["files","Shared files"]]]];
+  ["Both groups",[["overview","Overview"],["plan","Plan & KPIs"],["teams","Year 1 teams"],["members","Members"],["files","Shared files"]]]];
 // The two working groups are the big buttons under the masthead, not tabs in its nav row.
 const GROUP_BTNS = [["g22","G2.2","Curriculum Gap Working Group","Curriculum Content Gap Closure"],
                     ["g31","G3.1","Emerging Topics Working Group","Emerging Healthcare Competency Framework"]];
@@ -728,7 +728,7 @@ function memberList(gid){
   const ms=state.members.filter(m=>m.initiative===gid&&(m.kind||"Member")==="Member").sort((a,b)=>(a.order??99)-(b.order??99));
   if(!ms.length) return "";
   return `<details class="small"><summary style="cursor:pointer"><b>Working group members</b> <span class="muted">(${ms.length} seats)</span></summary>
-   <div style="display:grid;gap:8px;margin-top:8px">${ms.map(m=>`<div class="row" style="gap:8px;flex-wrap:nowrap">${avatar(m,32)}<div style="min-width:0;flex:1"><b>${esc(m.name)}</b> <span class="muted">· ${esc(m.seat)}</span></div>${statusPill(m.status)}</div>`).join("")}</div></details>`;
+   <div style="display:grid;gap:8px;margin-top:8px">${ms.map(m=>`<div class="row" style="gap:8px;flex-wrap:nowrap">${avatar(m,32)}<div style="min-width:0;flex:1"><b>${esc(m.name)}</b> <span class="muted">· ${esc(m.seat)}</span></div></div>`).join("")}</div></details>`;
 }
 function msGoal(g){
   return `<section class="card grid" style="gap:14px">
@@ -746,7 +746,7 @@ let rmInit="both";
 const rmOpen=new Set();
 function vTeams(){
   return `<div><h2>Year 1 working groups</h2><p class="lede">Co-leads and project managers as announced Oct 5. Each group has 4–7 members, every seat owning part of the work; add a student or resident voice only where the initiative touches their experience.</p></div>
-  <p class="note">Working group members are listed in the working details workbook on the <a href="#files" data-go="files">Shared files</a> page.</p>
+  <p class="note">The members of the G2.2 and G3.1 working groups, with photos, are on the <a href="#members" data-go="members">Members</a> page.</p>
   <div class="tablebox"><table><thead><tr><th>Goal</th><th>Initiative</th><th>Co-lead 1</th><th>Co-lead 2</th><th>Group PM</th><th class="num">Milestones</th></tr></thead><tbody>
   ${TEAMS.map(t=>`<tr ${MY_GOALS.includes(t[1])?'style="background:var(--accent-soft)"':""}><td class="mono">${t[1]}</td><td>${esc(GOAL[t[1]].init)}</td><td>${esc(t[2])}</td><td>${esc(t[3])}</td><td>${esc(t[4])}</td><td class="num">${t[5]}</td></tr>`).join("")}
   </tbody></table></div>
@@ -764,7 +764,26 @@ function vFiles(){
   ${state.links.length?`<section class="grid" style="gap:10px"><h3>Both groups</h3>${table(docs)}</section>
   <section class="grid" style="gap:10px"><h3>Steering Committee materials</h3>${table(sc)}</section>`:`<div class="empty">No working files listed yet.</div>`}`;
 }
-const VIEWS={overview:vOverview,plan:vPlan,teams:vTeams,files:vFiles,g22:()=>vGroup("G2.2"),g31:()=>vGroup("G3.1")};
+/* ---------- members (public: name, title, seat and photo only) ---------- */
+const KORDER={"Co-lead":0,"Project manager":1,"Member":2,"Plan leadership":3};
+const byPerson=(a,b)=>((KORDER[a.kind||"Member"]??2)-(KORDER[b.kind||"Member"]??2))||(a.order??99)-(b.order??99);
+function personCard(m){
+  const kind=m.kind||"Member", lead=["Co-lead","Project manager"].includes(kind);
+  return `<div class="card person ${lead?"lead":""}">${avatar(m,64)}<div style="min-width:0">
+    <div class="row spread" style="gap:6px;align-items:flex-start"><span class="nm">${esc(m.name)}</span>${kind==="Member"?"":`<span class="pill acc">${esc(kind)}</span>`}</div>
+    ${m.role?`<div class="small muted">${esc(m.role)}</div>`:""}
+    ${m.seat?`<div class="small" style="margin-top:6px">${esc(m.seat)}</div>`:""}</div></div>`;
+}
+function vMembers(){
+  if(!state.loaded) return `<div><h2>Members</h2></div>${storeNote()}`;
+  const groups=[["G2.2","Curriculum Content Gap Closure"],["G3.1","Emerging Healthcare Competency Framework"]];
+  const lead=state.members.filter(m=>m.kind==="Plan leadership").sort(byPerson);
+  return `<div><h2>Members</h2><p class="lede">The G2.2 and G3.1 working groups (co-leads, project managers and members) and the plan's leadership.</p></div>
+  ${groups.map(([g,n])=>{const ps=state.members.filter(m=>(m.initiative||"").includes(g)).sort(byPerson), mem=ps.filter(p=>(p.kind||"Member")==="Member");
+    return `<section class="grid" style="gap:12px"><div class="row spread"><h3 style="font:650 20px/1.25 var(--display)"><span class="mono">${g}</span> ${esc(n)}</h3><span class="small muted">${mem.length} member seats</span></div><div class="people">${ps.map(personCard).join("")}</div></section>`;}).join("")}
+  ${lead.length?`<section class="grid" style="gap:12px"><h3 style="font:650 20px var(--display)">Plan leadership</h3><div class="people">${lead.map(personCard).join("")}</div></section>`:""}`;
+}
+const VIEWS={overview:vOverview,plan:vPlan,teams:vTeams,members:vMembers,files:vFiles,g22:()=>vGroup("G2.2"),g31:()=>vGroup("G3.1")};
 function artIndex(){
   // The key documents (charters, gap report, working details) as chips; shared files and each group's documents have their own pages.
   const rows=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout");
@@ -872,7 +891,7 @@ if(location.hash) fromHash();
 renderTabs(); render();
 (function(){
   const D = window.E2I_DATA || {};
-  for(const k of ["gaps","milestones","links","emerging"]) state[k] = Array.isArray(D[k]) ? D[k] : [];
+  for(const k of ["gaps","milestones","links","emerging","members"]) state[k] = Array.isArray(D[k]) ? D[k] : [];
   state.workdoc = D.workdoc || {};
   state.kpis = {}; state.outbox = []; state.loaded = true; render();
   const f = document.getElementById("dataAsOf"); if(f && D.generated) f.textContent = "Data as of " + fmt(D.generated) + ". Read-only; updates come from the working groups' project managers.";
