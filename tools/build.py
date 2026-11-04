@@ -90,6 +90,15 @@ CHARTER_LINKS = [{"name": label, "kind": "Charter", "url": f"docs/{fn}", "format
                   "note": "Opens in the side panel; the Word copy in SharePoint is the one to edit"} for fn, label in CHARTERS.items()]
 
 
+# The G3.1 kickoff guides in kickoff/ (live slide reveal). Names start "G3.1" so they list on the G3.1 Documents tab.
+KICKOFF_LINKS = [
+    {"name": "G3.1 Kickoff: participant guide (live, Nov 4, 2026)", "kind": "Meeting guide", "date": "2026-11-04",
+     "url": "kickoff/", "format": "Web page", "note": "Members follow the slides here; no account needed"},
+    {"name": "G3.1 Kickoff: facilitator guide (access code; reveal buttons)", "kind": "Meeting guide", "date": "2026-11-04",
+     "url": "kickoff/facilitator.html", "format": "Web page", "note": "Co-leads and project manager; Reveal to members beside each slide"},
+]
+
+
 def publish_charters():
     """Copy the styled charter pages (user ruling 2026-10-25: charters readable on this public site) into docs/."""
     out = os.path.join(HERE, "docs"); os.makedirs(out, exist_ok=True)
@@ -113,7 +122,7 @@ def main():
     links = json.load(open(lp, encoding="utf-8")) if os.path.exists(lp) else []
     file_links = {l["file"]: l["url"] for l in links if l.get("file") and l.get("url")}
 
-    links = links + CHARTER_LINKS   # the charters on this site open in the side panel; SharePoint keeps the editable copies
+    links = links + CHARTER_LINKS + KICKOFF_LINKS   # the charters on this site open in the side panel; SharePoint keeps the editable copies
     public = {"generated": data.get("generated", ""),
               "gaps": [{k: g[k] for k in GAP_FIELDS if k in g} for g in data["gaps"]],
               "milestones": [{k: m[k] for k in MS_FIELDS if k in m} for m in data["milestones"]],
