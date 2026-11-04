@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emerging Topics Working Group Kickoff: Participant Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1d2b;--muted:#5d5f6b;--line:#e3e4ea;--bg:#f6f7fa;--card:#fff;--navy:#221F72;--blue:#0073A2;--purple:#68357C;--mag:#D80B8C;--cyan:#00AEEF;
+--say:#0073A2;--say-bg:#eaf5fc;--ask:#D80B8C;--ask-bg:#fdeef7;--emph:#b38600;--emph-bg:#fff8cf;--note:#c0392b;--note-bg:#fdecea;--resp:#1d8a57;--resp-bg:#eaf7f0;--ccm:#d27a00}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+main{max-width:900px;margin:0 auto;padding:22px 16px 64px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--purple);font-weight:600}
+h1{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:clamp(24px,4vw,32px);line-height:1.15;margin:6px 0 10px}
+h2.appx{font-family:'Source Serif 4',Georgia,serif;font-size:22px;margin:34px 0 8px;padding-top:18px;border-top:2px solid var(--line);color:var(--navy)}
+h3{font-size:17px;margin:14px 0 6px;color:var(--navy)}
+p{margin:0 0 9px}
+a{color:var(--blue)}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+.stamp{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:-2px 0 14px;font-size:13px;color:var(--muted)}
+.stamp span:first-child{background:#fff3df;border:1px solid #f3d6a6;color:#7a4b00;padding:3px 10px;border-radius:999px}
+.zoom{background:#eef6fb;border:1px solid #c9e2f1;border-radius:12px;padding:12px 16px;margin:0 0 18px;font-size:14.5px}
+.zoom b.h{display:block;color:var(--navy);font-size:15px;margin-bottom:4px}
+.zoom ol{margin:4px 0 0 18px;padding:0}.zoom li{margin:2px 0}
+.band{display:flex;align-items:center;gap:10px;margin:22px 0 12px;padding:9px 14px;border-radius:10px;background:linear-gradient(90deg,var(--navy),#3b37a0);color:#fff;font-weight:700;font-size:16.5px}
+.band .ic{flex:none;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:16px}
+.band .tm{margin-left:auto;font-size:13px;font-weight:600;background:rgba(255,255,255,.16);padding:2px 10px;border-radius:999px;white-space:nowrap}
+section > .band:first-child{margin-top:2px}
+.pill{display:inline-block;background:#fff3df;color:#7a4b00;border:1px solid #f3d6a6;border-radius:999px;padding:4px 12px;font-weight:700;font-size:14px;margin:0 0 10px}
+.li{display:flex;gap:8px;margin:0 0 5px 4px}.li .mk{flex:none;min-width:1.2em;color:var(--muted)}
+.tw{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}
+tr:first-child td{background:#f1f2f6;font-weight:600}
+table.timeline tr:first-child td{background:var(--navy);color:#fff;border-color:var(--navy)}
+table.timeline tr:nth-child(even) td{background:#f7f8fb}
+table.timeline td:first-child{font-weight:600;color:var(--navy);width:34%}
+table.timeline td:nth-child(2){white-space:nowrap;color:var(--ccm);font-weight:600}
+.call{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.c-em{background:#e9f8fb;color:#0089bd}.c-gap{background:#f1f2f5;color:#4a4b55}.c-hold{background:#fff3df;color:#7a4b00}
+figure.slide{margin:12px 0 14px}
+figure.slide img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px;cursor:zoom-in;box-shadow:0 2px 10px rgba(34,31,114,.07)}
+figure.slide figcaption{font-size:12.5px;color:var(--muted);margin-top:5px}
+figure.slide figcaption::before{content:"\1F5A5  "}
+.box{border-left:4px solid;border-radius:0 10px 10px 0;padding:10px 14px;margin:10px 0}
+.box .tag{display:table;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin:0 0 6px;color:#fff}
+.box p:last-child,.box .li:last-child{margin-bottom:0}
+.b-turn{background:var(--ask-bg);border-color:var(--ask)}.b-turn .tag{background:var(--ask)}
+.b-key{background:var(--emph-bg);border-color:var(--emph)}.b-key .tag{background:var(--emph)}
+.b-note{background:var(--note-bg);border-color:var(--note)}.b-note .tag{background:var(--note)}
+.b-zoom{background:var(--say-bg);border-color:var(--say)}.b-zoom .tag{background:var(--say)}
+mark{background:#ffe27a;color:inherit;font-weight:700;padding:0 2px;border-radius:3px}
+/* topic composer */
+.composer{background:#fff;border:1px dashed #b9cbe0;border-radius:12px;padding:14px 16px;margin:12px 0}
+.composer label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin:8px 0 3px}
+.composer input,.composer textarea{width:100%;font:inherit;font-size:14.5px;padding:7px 10px;border:1px solid #cfd3de;border-radius:8px;background:#fbfbfd}
+.composer textarea{min-height:56px;resize:vertical}
+.composer .out{margin-top:10px;font-size:13.5px;background:#f6f7fa;border:1px solid var(--line);border-radius:8px;padding:8px 10px;white-space:pre-wrap;word-break:break-word;color:#3f4150;min-height:38px}
+.composer button{margin-top:10px;border:0;border-radius:999px;padding:8px 16px;background:var(--navy);color:#fff;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.composer .msg{font-size:13px;color:var(--resp);margin-left:8px}
+.ck{display:flex;gap:8px;background:#f6faf7;border:1px solid #d9eee0;border-radius:8px;padding:7px 10px;margin:0 0 6px}
+.ck .mk{color:var(--resp);font-size:17px;line-height:1.3}
+details{border:1px solid var(--line);border-radius:10px;background:#fff;margin:0 0 10px}
+details summary{cursor:pointer;padding:10px 14px;font-weight:600;color:var(--navy);list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"\25B8  ";color:var(--mag)}
+details[open] summary::before{content:"\25BE  "}
+details .inner{padding:0 14px 12px}
+dl{margin:0}dt{font-weight:700;color:var(--navy);margin-top:10px}dd{margin:2px 0 0 0;color:#3f4150}
+.foot{font-size:12.5px;color:var(--muted);margin-top:8px}
+.lb{position:fixed;inset:0;background:rgba(10,12,40,.85);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.lb[hidden]{display:none}
+.lb img{max-width:100%;max-height:92vh;border-radius:8px;background:#fff}
+.lb button{position:absolute;top:12px;right:12px;border:0;border-radius:999px;padding:6px 14px;background:rgba(255,255,255,.2);color:#fff;font:inherit;cursor:pointer}
+@media (max-width:640px){body{font-size:15.5px}section{padding:14px}.band{font-size:15.5px}table.timeline td:first-child{width:auto}}
+
+.step{margin:0 0 20px}
+.step .num{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 4px}
+.step figure.slide{margin:0 0 8px}
+.skim{font-size:13px;color:var(--muted);font-style:italic;margin:0 0 8px}
+.fac{display:grid;grid-template-columns:1fr 250px;gap:12px;align-items:start;margin:6px 0 0}
+.fac .say{background:var(--say-bg);border-left:4px solid var(--say);border-radius:0 10px 10px 0;padding:10px 14px}
+.fac .say .tag{display:table;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin:0 0 6px;color:#fff;background:var(--say)}
+.fac .say p{margin:0;font-style:italic}
+.fac .cues{display:flex;flex-direction:column;gap:8px}
+.cue{border-left:4px solid;border-radius:0 8px 8px 0;padding:7px 10px;font-size:13px;line-height:1.45}
+.cue b{display:block;font-size:10px;letter-spacing:.08em;margin-bottom:2px}
+.c-who{background:#fff3df;border-color:#d27a00}.c-who b{color:#d27a00}
+.c-tip{background:#e9f8fb;border-color:#00AEEF}.c-tip b{color:#0089bd}
+.c-warn{background:var(--note-bg);border-color:var(--note)}.c-warn b{color:var(--note)}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}.links .lk{display:inline-block;padding:9px 16px;border-radius:999px;background:var(--navy);color:#fff;font-weight:700;font-size:14px;text-decoration:none}.links .lk:nth-child(2){background:var(--mag)}
+.member-sees{margin:8px 0 0;font-size:13px;color:var(--muted)}
+.member-sees summary{cursor:pointer;color:var(--blue);font-weight:600;padding:0;border:0}
+details.plain{border:0;background:none;margin:0}
+details.plain summary{padding:0}
+@media (max-width:760px){.fac{grid-template-columns:1fr}}
+
+.livepill{position:sticky;top:8px;z-index:20;display:flex;justify-content:center;margin:0 0 12px;pointer-events:none}
+.livepill span{pointer-events:auto;background:#221F72;color:#fff;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(34,31,114,.25)}
+.livepill span i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2fd17a;margin-right:7px;vertical-align:1px}
+.livepill.off span{background:#5d5f6b}.livepill.off span i{background:#c9cbd3}
+body.live .step.locked{display:none}
+body.live section.empty{display:none}
+#comingup{display:none;text-align:center;color:#5d5f6b;font-size:14px;border:2px dashed #d5dbe8;border-radius:12px;padding:16px;margin:0 0 18px;background:#fff}
+body.live #comingup{display:block}
+body.live.allshown #comingup{display:none}
+</style>
+</head>
+<body>
+<main>
+<div class="livepill" id="livepill"><span><i></i><b id="livetext">Connecting to the meeting…</b></span></div>
+<div class="eyebrow">MD Strategic Plan · G3.1 Emerging Topics Working Group · Session 1</div>
+<h1>Kickoff Meeting: Participant Guide</h1>
+<div class="stamp"><span>&#128197; Wed, Nov 4, 2026 · 3:00–4:00 PM</span><span>Zoom (link in Kevin Han's calendar invitation)</span></div>
+<div class="zoom">
+<b class="h">&#127909; Using this guide during the Zoom call</b>
+<ol>
+<li>Keep this page open in a browser window beside Zoom. The slides appear here in the same order they are shown, each with its notes underneath. Scroll down as the meeting moves on; click a slide to enlarge it.</li>
+<li>Use <b>Raise Hand</b> (Reactions in the Zoom toolbar) when you want to speak, or simply unmute in the open discussion.</li>
+<li>In the brainstorm (slide 24), post each topic in the <b>Zoom chat</b>. The box there formats it for you: topic, where you saw it, why it matters.</li>
+</ol>
+</div>
+<section>
+<div class="band"><span class="ic">&#128203;</span><strong>Opening</strong></div>
+<div class="step" id="slide-1"><span class="num">Slide 1 of 28</span><figure class="slide"><img src="slides/slide-01.jpg" alt="Slide 1: title" loading="lazy"></figure><p>The Emerging Topics Working Group (G3.1 of the MD Strategic Plan, <i>From Education to Impact</i>) builds a shared way to decide whether an emerging healthcare topic belongs in the MD curriculum, and how.</p></div>
+<div class="step" id="slide-2"><span class="num">Slide 2 of 28</span><figure class="slide"><img src="slides/slide-02.jpg" alt="Slide 2: members of the working group" loading="lazy"></figure><p>Co-leads Rainier Soriano and Ravi Ramaswamy, project manager Kevin Han, and six members, each bringing a different area of expertise.</p></div>
+<div class="step" id="slide-3"><span class="num">Slide 3 of 28</span><figure class="slide"><img src="slides/slide-03.jpg" alt="Slide 3: agenda" loading="lazy"></figure><h3>By the end of today we will have</h3><div class="li"><span class="mk">1.</span><div>Sorted the starting topic list into curriculum gaps (for G2.2) and emerging topics (for this group, G3.1)</div></div><div class="li"><span class="mk">2.</span><div>Captured the topics you add, each with a source and a reason</div></div><div class="li"><span class="mk">3.</span><div>Agreed the assignment, including review of the draft charter</div></div></div>
+<div class="step" id="slide-4"><span class="num">Slide 4 of 28</span><figure class="slide"><img src="slides/slide-04.jpg" alt="Slide 4: what is an emerging topic" loading="lazy"></figure><div class="box b-key"><span class="tag">Working definition</span><p><b>An emerging healthcare topic</b> is knowledge or a capability that is changing, or likely to change, how our graduates practice in the next five to ten years, <b>and</b> that the MD program is not yet expected to teach by LCME Standard 7, the USMLE content outlines, or the national norm (most schools require it, per AAMC SCOPE).</p></div><p>It is <b>not</b> a topic we are already expected to teach, even if we teach it too little or not at all (that is a G2.2 gap), and not a topic chosen only because someone champions it. This is a draft: the group confirms or changes the wording today.</p></div>
+</section>
+<section>
+<div class="band"><span class="ic">&#128075;</span><strong>I. Welcome and the Charge</strong><span class="tm">3:00–3:07</span></div>
+<div class="step" id="slide-5"><span class="num">Slide 5 of 28</span><figure class="slide"><img src="slides/slide-05.jpg" alt="Slide 5: introductions prompt" loading="lazy"></figure><div class="box b-turn"><span class="tag">Your turn</span><p>About 45 seconds: your name, your role, and <b>one topic you think our graduates will need that they may not be getting now</b>. Your topic becomes the first entry in the brainstorm.</p></div></div>
+<div class="step" id="slide-6"><span class="num">Slide 6 of 28</span><figure class="slide"><img src="slides/slide-06.jpg" alt="Slide 6: the Year 1 charge" loading="lazy"></figure><p>In Year 1 the group builds and pilots an <b>evaluative framework</b>, tests it on three to five topics by March 31, 2027, and brings it to the Executive Education Committee (EEC) in July 2027.</p><div class="box b-key"><span class="tag">Key point</span><div class="li"><span class="mk">•</span><div>Year 1 adds <mark>no new content</mark> to the curriculum.</div></div><div class="li"><span class="mk">•</span><div>The working group recommends; the EEC decides.</div></div></div></div>
+<div class="step" id="slide-7"><span class="num">Slide 7 of 28</span><figure class="slide"><img src="slides/slide-07.jpg" alt="Slide 7: what the framework looks like" loading="lazy"></figure><p>Every proposed topic goes through the same six steps. Each remaining topic gets a one-page <b>evidence packet</b> across eleven criteria; members score privately first, then discuss differences. The group sets the scoring and decision rules by February 18.</p></div>
+</section>
+<section>
+<div class="band"><span class="ic">&#9878;</span><strong>II. Gap or Emerging, and Where the Evidence Comes From</strong><span class="tm">3:07–3:12</span></div>
+<div class="step" id="slide-8"><span class="num">Slide 8 of 28</span><figure class="slide"><img src="slides/slide-08.jpg" alt="Slide 8: the two-question rule" loading="lazy"></figure><p>If accreditation (LCME Standard 7), the licensing exams (USMLE) or the national norm (AAMC SCOPE: what most schools require) already expects a topic, it is a <b>curriculum gap</b> and goes to G2.2, whether or not we teach it now. Only what lies beyond those expectations is an <b>emerging topic</b> for this group.</p></div>
+<div class="step" id="slide-9"><span class="num">Slide 9 of 28</span><figure class="slide"><img src="slides/slide-09.jpg" alt="Slide 9: what sets the expectation" loading="lazy"></figure><p>These sources decide whether the program is <b>expected</b> to teach a topic. The next five slides give the strengths and limits of each.</p></div>
+<div class="step" id="slide-10"><span class="num">Slide 10 of 28</span><figure class="slide"><img src="slides/slide-10.jpg" alt="Slide 10: LCME Standard 7: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p></div>
+<div class="step" id="slide-11"><span class="num">Slide 11 of 28</span><figure class="slide"><img src="slides/slide-11.jpg" alt="Slide 11: USMLE content outlines: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p></div>
+<div class="step" id="slide-12"><span class="num">Slide 12 of 28</span><figure class="slide"><img src="slides/slide-12.jpg" alt="Slide 12: State and federal mandates: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p></div>
+<div class="step" id="slide-13"><span class="num">Slide 13 of 28</span><figure class="slide"><img src="slides/slide-13.jpg" alt="Slide 13: AAMC SCOPE: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p><p>SCOPE tells us what peer schools teach, as a percent of schools. It is a norm, not a requirement.</p></div>
+<div class="step" id="slide-14"><span class="num">Slide 14 of 28</span><figure class="slide"><img src="slides/slide-14.jpg" alt="Slide 14: AAMC GQ and Y2Q: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p></div>
+<div class="step" id="slide-15"><span class="num">Slide 15 of 28</span><figure class="slide"><img src="slides/slide-15.jpg" alt="Slide 15: evidence and stakeholder push" loading="lazy"></figure><p>For topics <b>beyond</b> what is expected, these sources build the case. The next five slides give the strengths and limits of each.</p></div>
+<div class="step" id="slide-16"><span class="num">Slide 16 of 28</span><figure class="slide"><img src="slides/slide-16.jpg" alt="Slide 16: National competency sets: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p></div>
+<div class="step" id="slide-17"><span class="num">Slide 17 of 28</span><figure class="slide"><img src="slides/slide-17.jpg" alt="Slide 17: Literature and consensus reports: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p></div>
+<div class="step" id="slide-18"><span class="num">Slide 18 of 28</span><figure class="slide"><img src="slides/slide-18.jpg" alt="Slide 18: Our own data: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p></div>
+<div class="step" id="slide-19"><span class="num">Slide 19 of 28</span><figure class="slide"><img src="slides/slide-19.jpg" alt="Slide 19: Health system and practice: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p></div>
+<div class="step" id="slide-20"><span class="num">Slide 20 of 28</span><figure class="slide"><img src="slides/slide-20.jpg" alt="Slide 20: Stakeholder proposals: pros and cons" loading="lazy"></figure><p class="skim">Pros and cons for reference; we will move through these quickly.</p><p>A proposal is a valid starting point, but it still needs a source and a reason: that is what the brainstorm asks for.</p></div>
+<div class="step" id="slide-21"><span class="num">Slide 21 of 28</span><figure class="slide"><img src="slides/slide-21.jpg" alt="Slide 21: how G2.2 and G3.1 fit together" loading="lazy"></figure><div class="box b-note"><span class="tag">Note</span><p>Topics sorted as gaps are not dropped: they move to the G2.2 gap register, run by the same co-leads.</p></div></div>
+</section>
+<section>
+<div class="band"><span class="ic">&#128221;</span><strong>III. The Starting Topic List</strong><span class="tm">3:12–3:27</span></div>
+<div class="step" id="slide-22"><span class="num">Slide 22 of 28</span><figure class="slide"><img src="slides/slide-22.jpg" alt="Slide 22: draft emerging topics" loading="lazy"></figure><p>The starting list was culled from national sources. Each topic has a <b>draft call</b> only; the group confirms or changes it.</p></div>
+<div class="step" id="slide-23"><span class="num">Slide 23 of 28</span><figure class="slide"><img src="slides/slide-23.jpg" alt="Slide 23: draft gaps for G2.2" loading="lazy"></figure><div class="box b-turn"><span class="tag">Your turn</span><p>For each topic, ask yourself:</p><div class="li"><span class="mk">•</span><div>Would a standard, or most schools, already expect this?</div></div><div class="li"><span class="mk">•</span><div>Is part of it expected and part beyond it?</div></div><p>Speak up where you disagree with the draft call.</p></div><details><summary>Sources for every topic on the starting list</summary><div class="inner"><div class="tw"><table>
+<tr><td>Topic</td><td>Source</td><td>Draft call</td></tr>
+<tr><td>AI and digital health, beyond the required basics</td><td>AAMC AI Competencies (2026); AAMC AI principles (2025); AMA AI literacy policy (2025); Russell et al., Acad Med (2023)</td><td><span class="call c-em">Emerging</span></td></tr>
+<tr><td>Climate change and health</td><td>NAM Perspectives (2024); GCCHE Core Concepts (2025)</td><td><span class="call c-em">Emerging</span></td></tr>
+<tr><td>Genomics, beyond precision-medicine basics</td><td>APHMG, Genet Med (2022); NHGRI competencies</td><td><span class="call c-em">Emerging</span></td></tr>
+<tr><td>Point-of-care ultrasound</td><td>Practice ahead of the standards</td><td><span class="call c-em">Emerging</span> to confirm</td></tr>
+<tr><td>Firearm injury prevention</td><td>Hoops et al., Acad Med (2022); AAMC News (2022)</td><td><span class="call c-hold">On hold</span> until the 2026 SCOPE figure</td></tr>
+<tr><td>Telehealth and virtual care</td><td>AAMC Telehealth Competencies (2026); AAMC SCOPE</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Health systems science and high-value care</td><td>NBME HSS subject exam; AAMC QIPS competencies</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Social drivers of health</td><td>NASEM framework; Solomon et al. (2024); LCME standards change (2026)</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Substance use and opioid use disorder</td><td>SAMHSA and ONDCP core curriculum (2024)</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Aging, geriatrics and dementia</td><td>Schwartz et al., Acad Med (2025); AGS competencies (2021)</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Disability health</td><td>Lee et al., Med Educ Online (2023); Alliance core competencies</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>LGBTQ+ health</td><td>AAMC learner competencies (2014)</td><td><span class="call c-gap">Gap</span> to confirm</td></tr>
+<tr><td>Obesity</td><td>AAMC SCOPE: 98.9% of schools require it</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Motivational interviewing</td><td>AAMC SCOPE: 98.3%</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Medical jurisprudence</td><td>AAMC SCOPE: 93.5%</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Lifestyle medicine</td><td>AAMC SCOPE: 89.0%</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Medical humanities</td><td>AAMC SCOPE: 88.5%</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Occupational health</td><td>AAMC SCOPE: 79.0%</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Mis- and disinformation</td><td>AAMC SCOPE: 74.9%</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Complementary medicine</td><td>AAMC SCOPE: 73.8%</td><td><span class="call c-gap">Gap</span></td></tr>
+<tr><td>Veterans' care</td><td>AAMC SCOPE: 60.0%</td><td><span class="call c-gap">Gap</span></td></tr>
+</table></div></div></details></div>
+</section>
+<section>
+<div class="band"><span class="ic">&#128161;</span><strong>IV. Brainstorm: What Is Missing?</strong><span class="tm">3:27–3:47</span></div>
+<div class="step" id="slide-24"><span class="num">Slide 24 of 28</span><figure class="slide"><img src="slides/slide-24.jpg" alt="Slide 24: brainstorm questions" loading="lazy"></figure><div class="box b-note"><span class="tag">Note</span><p>New topics are <mark>not</mark> sorted into gap or emerging today. That call is made in December, once the source is in hand.</p></div><div class="composer" id="composer">
+<b style="color:var(--navy)">&#128172; Propose a topic in the Zoom chat</b>
+<p class="foot" style="margin:2px 0 0">Fill in the boxes, press Copy, then paste into the Zoom chat. Nothing is sent from this page.</p>
+<label for="c-topic">Topic</label><input id="c-topic" placeholder="e.g., Wearable health data in clinical care">
+<label for="c-src">Where did you see it?</label><input id="c-src" placeholder="A standard, society, paper, or practice">
+<label for="c-why">Why does it matter for our graduates?</label><textarea id="c-why"></textarea>
+<label for="c-link">Document or link (if you have it)</label><input id="c-link" placeholder="https://…">
+<div class="out" id="c-out" aria-live="polite">TOPIC: … | SOURCE: … | WHY: …</div>
+<button type="button" id="c-copy">Copy for Zoom chat</button><span class="msg" id="c-msg"></span>
+</div></div>
+</section>
+<section>
+<div class="band"><span class="ic">&#128203;</span><strong>V. Your Assignment and the Charter</strong><span class="tm">3:47–3:55</span></div>
+<div class="step" id="slide-25"><span class="num">Slide 25 of 28</span><figure class="slide"><img src="slides/slide-25.jpg" alt="Slide 25: your assignment" loading="lazy"></figure><p>Two deadlines.</p><div class="ck"><span class="mk">&#9744;</span><div><b>By Monday, November 10: review and approve the draft charter.</b> Kevin Han sends it with today's list on November 5. Reply with your approval or comments; the charter goes to the Change Log on November 13.</div></div><p style="margin-top:10px"><b>One week before the December meeting:</b></p><div class="ck"><span class="mk">&#9744;</span><div><b>Finalize the list.</b> Add any topic we missed. For each topic you added, send the source itself (the standard, guideline, competency set or paper, as a document or link) and why it matters.</div></div><div class="ck"><span class="mk">&#9744;</span><div><b>Check the calls.</b> Mark any gap or emerging call you disagree with, and say why.</div></div><div class="ck"><span class="mk">&#9744;</span><div><b>Prioritize.</b> Rank the emerging topics, most important first, with one line on why for your top three.</div></div><div class="ck"><span class="mk">&#9744;</span><div><b>Name the sources.</b> For your top-ranked topics, any competency set, guideline or key source document you know of.</div></div></div>
+<div class="step" id="slide-26"><span class="num">Slide 26 of 28</span><figure class="slide"><img src="slides/slide-26.jpg" alt="Slide 26: the draft charter: what you will review" loading="lazy"></figure><p>The draft charter follows the plan's standard outline: eleven sections and six appendices. Look first at your own row in section 7 (what you own) and at section 2 (scope). Appendix B has the draft criteria.</p></div>
+</section>
+<section>
+<div class="band"><span class="ic">&#9989;</span><strong>VI. Wrap-up and What Comes Next</strong><span class="tm">3:55–4:00</span></div>
+<div class="step" id="slide-27"><span class="num">Slide 27 of 28</span><figure class="slide"><img src="slides/slide-27.jpg" alt="Slide 27: roadmap to the final product" loading="lazy"></figure><p>Each session ends at a fixed point, and the work between sessions produces what the next one needs. Today's ranking feeds the December priorities, which feed the choice of pilot topics in February.</p></div>
+<div class="step" id="slide-28"><span class="num">Slide 28 of 28</span><figure class="slide"><img src="slides/slide-28.jpg" alt="Slide 28: decisions and next meeting" loading="lazy"></figure></div>
+</section>
+<div id="comingup">More slides appear here as the meeting moves on.</div>
+<h2 class="appx">Terms Used Today</h2>
+<section>
+<dl>
+<dt>G2.2 · Curriculum Gap Working Group</dt><dd>The strategic plan initiative that closes gaps in content the program is already expected to teach.</dd>
+<dt>G3.1 · Emerging Topics Working Group</dt><dd>This group: builds the framework for judging topics beyond what the program is expected to teach.</dd>
+<dt>Evaluative framework</dt><dd>The criteria, evidence, topic intake form and scoring and decision rules this group builds and pilots in Year 1.</dd>
+<dt>EEC</dt><dd>The Executive Education Committee, which decides on curriculum recommendations.</dd>
+<dt>LCME Standard 7</dt><dd>The accreditation standard for MD curriculum content.</dd>
+<dt>USMLE</dt><dd>The United States Medical Licensing Examination: Step 1 and Step 2 CK test what is in their published content outlines.</dd>
+<dt>AAMC SCOPE</dt><dd>An annual AAMC survey of medical school curricula, reporting the percent of schools that require each topic.</dd>
+<dt>GQ and Y2Q</dt><dd>AAMC's Graduation Questionnaire and Year 2 Questionnaire, in which students rate their preparation by topic.</dd>
+<dt>Draft call</dt><dd>The starting gap or emerging label on a listed topic, for the group to confirm or change.</dd>
+</dl>
+</section>
+<p class="foot">Prepared for members of the G3.1 Emerging Topics Working Group · MD Strategic Plan, <i>From Education to Impact</i> · Office of Curricular Affairs, Icahn School of Medicine at Mount Sinai</p>
+</main>
+<div class="lb" id="lb" hidden><button type="button" id="lb-close">Close</button><img id="lb-img" alt=""></div>
+<script>
+(function(){
+  var lb=document.getElementById('lb'),li=document.getElementById('lb-img');
+  document.querySelectorAll('figure.slide img').forEach(function(im){
+    im.addEventListener('click',function(){li.src=im.src;li.alt=im.alt;lb.hidden=false;});
+  });
+  function shut(){lb.hidden=true;li.src='';}
+  document.getElementById('lb-close').addEventListener('click',shut);
+  lb.addEventListener('click',function(e){if(e.target===lb)shut();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')shut();});
+  var f=['c-topic','c-src','c-why','c-link'].map(function(id){return document.getElementById(id);});
+  var out=document.getElementById('c-out'),msg=document.getElementById('c-msg');
+  function text(){
+    var t='TOPIC: '+(f[0].value.trim()||'…')+' | SOURCE: '+(f[1].value.trim()||'…')+' | WHY: '+(f[2].value.trim()||'…');
+    if(f[3].value.trim()) t+=' | LINK: '+f[3].value.trim();
+    return t;
+  }
+  f.forEach(function(el){el.addEventListener('input',function(){out.textContent=text();msg.textContent='';});});
+  document.getElementById('c-copy').addEventListener('click',function(){
+    var t=text();
+    try{
+      navigator.clipboard.writeText(t).then(function(){msg.textContent='Copied. Paste it into the Zoom chat.';},function(){sel();});
+    }catch(e){sel();}
+    function sel(){var r=document.createRange();r.selectNodeContents(out);var s=window.getSelection();s.removeAllRanges();s.addRange(r);msg.textContent='Selected: press Ctrl/Cmd+C to copy.';}
+  });
+})();
+</script>
+<script>
+(function(){
+  var LIVE='https://ascend-support-dashboard.vercel.app/api/live', ROOM='g31-kickoff', TOTAL=28;
+  var steps=[].slice.call(document.querySelectorAll('.step[id^="slide-"]'));
+  var sections=[].slice.call(document.querySelectorAll('main > section'));
+  var pill=document.getElementById('livepill'), txt=document.getElementById('livetext');
+  var cur=null, fails=0, live=true;
+  document.body.classList.add('live');
+  function apply(n, all){
+    steps.forEach(function(s){ var k=+s.id.slice(6); s.classList.toggle('locked', !all && k>n); });
+    sections.forEach(function(sec){ var any=sec.querySelector('.step:not(.locked)')||!sec.querySelector('.step'); sec.classList.toggle('empty', !any); });
+    document.body.classList.toggle('allshown', !!all || n>=TOTAL);
+    var last=null; steps.forEach(function(s){ if(!s.classList.contains('locked')) last=s; });
+    var cu=document.getElementById('comingup'); if(last && cu){ last.parentNode.insertBefore(cu, last.nextSibling); }
+    return last;
+  }
+  function showAll(msg){ live=false; document.body.classList.remove('live'); apply(TOTAL,true); pill.classList.add('off'); txt.textContent=msg; }
+  apply(1,false);
+  var waited=setTimeout(function(){ if(cur===null) showAll('Showing all slides'); }, 6000);
+  function tick(){
+    fetch(LIVE+'?room='+encodeURIComponent(ROOM),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+      if(!j||!j.ok) throw 0;
+      fails=0; clearTimeout(waited);
+      if(!live){ live=true; document.body.classList.add('live'); pill.classList.remove('off'); }
+      var n=j.all?TOTAL:Math.max(1,Math.min(TOTAL,j.slide|0));
+      var grew=(cur!==null && n>cur);
+      var last=apply(n, !!j.all);
+      txt.textContent=j.all?'Live · all slides shown':'Live · following the presenter · slide '+n+' of '+TOTAL;
+      if(grew && last){ last.scrollIntoView({behavior:'smooth',block:'start'}); }
+      cur=n;
+    }).catch(function(){ fails++; if(fails>=3 || cur===null && fails>=2) showAll('Showing all slides'); });
+  }
+  tick(); setInterval(tick, 3000);
+})();
+</script>
+</body>
+</html>
