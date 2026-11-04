@@ -328,7 +328,7 @@ const SCHEMAS = {
 const state = {db:null, actions:[], meetings:[], gaps:[], emerging:[], materials:[], milestones:[], members:[], minutes:[], outbox:[], links:[], kpis:{}, loaded:false, writable:false};
 let tab = "overview";
 const TAB_GROUPS = [
-  ["Both groups",[["overview","Overview"],["plan","Plan & KPIs"],["teams","Year 1 teams"],["members","Members"],["files","Shared files"]]]];
+  ["Both groups",[["overview","Overview"],["plan","Plan & KPIs"],["teams","Year 1 teams"],["members","Members"],["files","Shared files"],["scope","SCOPE survey"]]]];
 // The two working groups are the big buttons under the masthead, not tabs in its nav row.
 const GROUP_BTNS = [["g22","G2.2","Curriculum Gap Working Group","Curriculum Content Gap Closure"],
                     ["g31","G3.1","Emerging Topics Working Group","Emerging Healthcare Competency Framework"]];
@@ -756,7 +756,7 @@ function listToolbar(kind, extra=""){
   return `<div class="row spread"><div class="filters">${extra}</div>${state.loaded&&state.writable?`<button class="btn primary" data-add="${kind}">Add ${SCHEMAS[kind].title}</button>`:""}</div>`;
 }
 function vFiles(){
-  const docs=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout"&&!groupOf(l));
+  const docs=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout"&&!isScopeLink(l)&&!groupOf(l));
   const sc=state.links.filter(l=>["Pre-read","Synopsis","Handout"].includes(l.kind)).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
   const row=l=>`<tr><td style="min-width:240px"><b><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a></b></td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td></tr>`;
   const table=rs=>`<div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${rs.map(row).join("")}</tbody></table></div>`;
@@ -783,10 +783,82 @@ function vMembers(){
     return `<section class="grid" style="gap:12px"><div class="row spread"><h3 style="font:650 20px/1.25 var(--display)"><span class="mono">${g}</span> ${esc(n)}</h3><span class="small muted">${mem.length} member seats</span></div><div class="people">${ps.map(personCard).join("")}</div></section>`;}).join("")}
   ${lead.length?`<section class="grid" style="gap:12px"><h3 style="font:650 20px var(--display)">Plan leadership</h3><div class="people">${lead.map(personCard).join("")}</div></section>`:""}`;
 }
-const VIEWS={overview:vOverview,plan:vPlan,teams:vTeams,members:vMembers,files:vFiles,g22:()=>vGroup("G2.2"),g31:()=>vGroup("G3.1")};
+
+/* ---------- SCOPE survey: Sinai's AAMC Curriculum SCOPE results, read live from the SCOPE dashboard ---------- */
+const SCOPE_SITE = "https://sinaiascend-oca.github.io/Surveys-Benchmarks/scope/";
+let SCOPE = null, scopeErr = null, scopeLoading = false;
+function loadScope(){
+  if(SCOPE||scopeLoading||scopeErr) return; scopeLoading=true;
+  import(SCOPE_SITE+"scope-data.js").then(m=>{ SCOPE=m.default; scopeLoading=false; if(tab==="scope") render(); })
+    .catch(e=>{ scopeErr=String((e&&e.message)||e); scopeLoading=false; if(tab==="scope") render(); });
+}
+const SCOPE_PUBLIC = [  // AAMC national reports, hosted on the SCOPE dashboard (public)
+  ["SCOPE Aggregate Statistics Report 2024–25","National report","SCOPE_Aggregate_Report_2024-2025.pdf"],
+  ["SCOPE Aggregate Report 2023–24","National report","SCOPE_Aggregate_Report_2023-2024.pdf"],
+  ["SCOPE National Report 2022–23","National report","SCOPE_National_Report_2022-2023.pdf"],
+  ["SCOPE Glossary (2025)","Reference","SCOPE_Glossary_2025.pdf"],
+  ["SCOPE Survey Questions (2023)","Reference","SCOPE_Survey_Questions_2023.pdf"],
+  ["Data Snapshot: Artificial Intelligence","Data snapshot","Snapshot_Artificial_Intelligence.pdf"],
+  ["Data Snapshot: Addiction Medicine","Data snapshot","Snapshot_Addiction_Medicine.pdf"],
+  ["Data Snapshot: Nutrition","Data snapshot","Snapshot_Nutrition.pdf"],
+  ["Data Snapshot: Anatomy","Data snapshot","Snapshot_Anatomy.pdf"],
+  ["Data Snapshot: Changing Environment","Data snapshot","Snapshot_Changing_Environment.pdf"],
+  ["Data Snapshot: Longitudinal Integrated Clerkships","Data snapshot","Snapshot_LICs.pdf"],
+  ["Data Snapshot: Transition to Residency","Data snapshot","Snapshot_TTR.pdf"],
+  ["Transition to Residency Courses in U.S. and Canadian Curricula","Data snapshot","Transition_to_Residency_Courses_in_U_S__and_Canadian_Medical_School_Curricula.pdf"]
+];
+const isScopeLink = l => l.kind==="SCOPE";
+function vScope(){
+  loadScope();
+  const head = `<div><h2>SCOPE survey</h2><p class="lede">Mount Sinai's answers to the AAMC Curriculum SCOPE Survey and the national results they are compared with. Use it with the two-question rule: a topic most U.S. schools require is an expected topic (G2.2); a topic new to the survey, or one few schools teach yet, is a signal for G3.1. The full interactive view is the <a href="${SCOPE_SITE}" target="_blank" rel="noopener">SCOPE dashboard ↗</a>.</p></div>`;
+  const ours = state.links.filter(isScopeLink).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  const row=(name,url,kind,date,format)=>`<tr><td style="min-width:240px"><b><a href="${esc(url)}" target="_blank" rel="noopener">${esc(name)}</a></b></td><td>${esc(kind)}</td><td class="num">${date?fmt(date):"—"}</td><td>${statusPill(format)}</td></tr>`;
+  const docs = `<section class="grid" style="gap:10px"><h3>Mount Sinai's SCOPE files</h3><p class="small muted" style="margin:0">Our submitted responses and the AAMC's Mount Sinai reports. These open in SharePoint with a Mount Sinai sign-in.</p>
+    ${ours.length?`<div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${ours.map(l=>row(l.name,l.url,l.note||"Mount Sinai",l.date,l.format||"")).join("")}</tbody></table></div>`:`<div class="empty">No Mount Sinai SCOPE files listed yet.</div>`}</section>
+  <section class="grid" style="gap:10px"><h3>National reports and data snapshots</h3><p class="small muted" style="margin:0">Published by the AAMC; open without a sign-in.</p>
+    <div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${SCOPE_PUBLIC.map(([n,k,f])=>row(n,SCOPE_SITE+"reports/"+f,k,"","PDF")).join("")}</tbody></table></div></section>`;
+  if(scopeErr) return head+`<div class="empty">The SCOPE results could not be loaded from the SCOPE dashboard (${esc(scopeErr)}). The documents below still open.</div>`+docs;
+  if(!SCOPE) return head+`<div class="empty">Loading SCOPE results…</div>`+docs;
+
+  const D=SCOPE, S26=D.sinai2026, latest=D.years[D.years.length-1], yr=latest.id, yl=y=>String(y).replace("-","–");
+  const nat=D.topics[yr]||[], sin=D.sinai.topics[yr]||{};
+  const gaps=[], ahead=[];
+  nat.forEach(t=>{ const s=sin[t.name]; if(!s||typeof t.required!=="number") return;
+    if(!s.req && t.required>=50) gaps.push(t); if(s.req && t.required<50) ahead.push(t); });
+  gaps.sort((a,b)=>b.required-a.required); ahead.sort((a,b)=>a.required-b.required);
+  const t26=n=>S26&&S26.topics.find(x=>x.name.toLowerCase()===String(n).toLowerCase());
+  const natRow=(t,side)=>{ const x=t26(t.name); const now=x?(x.req?' <span class="small muted">· 2026 submission: required</span>':' <span class="small muted">· 2026 submission: still not required</span>'):"";
+    return `<tr><td><b>${esc(t.name)}</b></td><td class="num">${t.required}%</td><td>${side}${now}</td></tr>`; };
+  const natTable=(rs,side,empty)=>rs.length?`<div class="tablebox"><table><thead><tr><th>Topic</th><th class="num">U.S. schools requiring it</th><th>Mount Sinai</th></tr></thead><tbody>${rs.map(t=>natRow(t,side)).join("")}</tbody></table></div>`:`<div class="empty">${empty}</div>`;
+
+  let sub="";
+  if(S26){
+    const st=(r,e)=>r?(e?"Required + elective":"Required"):(e?"Elective only":"Not included");
+    const ch=[];
+    S26.topics.forEach(t=>{ const p=t.prior; if(t.isNew||!p) return; const k=[];
+      if(t.req&&!p.req) k.push(["Now required","cy"]); else if(!t.req&&p.req) k.push(["No longer required","bad"]);
+      if(t.elec===1&&p.elec===0) k.push(["Elective added","ok"]); else if(t.elec===0&&p.elec===1) k.push(["Elective dropped","warn"]);
+      if(k.length) ch.push({t,k,o:k[0][1]==="bad"?0:k[0][1]==="warn"?1:k[0][1]==="cy"?2:3}); });
+    ch.sort((a,b)=>a.o-b.o||a.t.name.localeCompare(b.t.name));
+    sub=`<section class="card grid" style="gap:14px"><div class="row spread"><div><div class="eyebrow muted">Latest submission · AY ${esc(S26.label)}</div><h3 style="font:650 20px/1.25 var(--display);margin-top:4px">SCOPE 2026: what Mount Sinai reported</h3><p class="small muted" style="margin:4px 0 0">Submitted ${esc(S26.submitted)}. ${esc(S26.status)}</p></div>${statusPill("Pending")}</div>
+      <div class="grid g4">${S26.stats.map(x=>`<div class="card stat"><b>${esc(x.value)}</b><span>${esc(x.label)}</span></div>`).join("")}</div>
+      <div class="grid g2">
+        <div><h3 style="margin-bottom:8px">Changed since our last answer</h3><div class="tablebox"><table><thead><tr><th>Topic</th><th>Change</th><th>Before</th></tr></thead><tbody>${ch.map(c=>`<tr><td><b>${esc(c.t.name)}</b></td><td>${c.k.map(([l,cl])=>`<span class="pill ${cl}">${l}</span>`).join(" ")}</td><td class="small muted">${yl(c.t.prior.year)}: ${st(c.t.prior.req,c.t.prior.elec)}</td></tr>`).join("")}</tbody></table></div></div>
+        <div class="grid" style="gap:12px;align-content:start"><div><h3 style="margin-bottom:8px">Topics new to the survey this year</h3><div class="tablebox"><table><thead><tr><th>Topic</th><th>Mount Sinai</th></tr></thead><tbody>${S26.topics.filter(t=>t.isNew).map(t=>`<tr><td><b>${esc(t.name)}</b></td><td>${statusPill(st(t.req,t.elec))}</td></tr>`).join("")}</tbody></table></div></div>
+          <div><h3 style="margin-bottom:8px">What we told the AAMC is coming in the next 1–3 years</h3><div class="chips">${S26.upcoming.map(u=>`<span class="chip">${esc(u)}</span>`).join("")}</div></div></div>
+      </div></section>`;
+  }
+  return head+sub+`
+  <section class="grid" style="gap:12px"><div><h3>Mount Sinai against the national norm (${esc(latest.label)})</h3><p class="small muted" style="margin:4px 0 0">From the latest national results, released ${esc(latest.released)}. National results for 2025–26 are not out yet, so the 2026 answers are not compared here.</p></div>
+    <div class="grid g2">
+      <div><h4 style="margin:0 0 8px">Most schools require it; we do not (${gaps.length})</h4><p class="small muted" style="margin:0 0 8px">Candidates for the G2.2 gap register.</p>${natTable(gaps,'<span class="pill bad">Not required</span>',"We require every topic most U.S. schools require.")}</div>
+      <div><h4 style="margin:0 0 8px">We require it; most schools do not (${ahead.length})</h4><p class="small muted" style="margin:0 0 8px">Where Mount Sinai is ahead of the norm.</p>${natTable(ahead,'<span class="pill ok">Required</span>',"None this year.")}</div>
+    </div></section>`+docs;
+}
+const VIEWS={overview:vOverview,plan:vPlan,teams:vTeams,members:vMembers,files:vFiles,scope:vScope,g22:()=>vGroup("G2.2"),g31:()=>vGroup("G3.1")};
 function artIndex(){
   // The key documents (charters, gap report, working details) as chips; shared files and each group's documents have their own pages.
-  const rows=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout");
+  const rows=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout"&&!isScopeLink(l));
   if(!rows.length) return "";
   const short=n=>String(n||"").replace(/\s*\((Claude Doc[^)]*|for EEC)\)\s*$/i,"");
   let open=true; try{ open=localStorage.getItem("aixClosed")!=="1"; }catch(_){}
