@@ -98,7 +98,7 @@ KICKOFF_LINKS = [
      "url": "kickoff/", "format": "Web page", "note": "Members follow the slides here; no account needed"},
     {"name": "G3.1 Kickoff: meeting summary and action plan (Nov 4, 2026)", "kind": "Meeting summary", "date": "2026-11-04",
      "url": "kickoff/summary.html", "format": "Web page", "note": "Decisions, topics proposed, actions with owners and dates"},
-    {"name": "G2.2 Kickoff: participant guide (live; date to be set, second half of November 2026)", "kind": "Meeting guide",
+    {"name": "G2.2 Kickoff: participant guide (live, Nov 12, 2026)", "kind": "Meeting guide",
      "date": "2026-11-05", "url": "kickoff-g22/", "format": "Web page",
      "note": "Members follow the slides here; no account needed"},
     {"name": "G3.1 Evidence source: SCOPE survey page (Both groups)", "kind": "Evidence source", "date": "2026-11-05",
