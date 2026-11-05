@@ -131,6 +131,7 @@ SP_FOLDERS = {
 FOLDER_ORDER = ["01 Charter", "02 Meetings", "02 Meetings › Meeting Minutes", "03 Working Drafts", "Evidence and reports"]
 _SP = [  # (group, folder, name, kind, date, format, SharePoint UniqueId)
     ("G3.1", "01 Charter", "Year 1 charter workbook (Year1_Charter_G3.1_EmergComp)", "Charter", "2026-11-04", "Excel", "19436ef7-c06e-4ef3-a506-a733f1b3ccee"),
+    ("G3.1", "01 Charter", "Charter approval vote (G3.1_Charter_Vote_2026-11)", "Charter vote", "2026-11-05", "Excel", "b110e6c0-e657-4fc1-9973-681e900ed199"),
     ("G3.1", "02 Meetings", "Running agenda", "Agenda", "2026-10-30", "Word", "88c28fff-8412-40a1-aea0-93234c9ea513"),
     ("G3.1", "02 Meetings", "Kickoff slides (Nov 4, 2026)", "Slides", "2026-11-04", "PowerPoint", "41aa74be-01a9-4427-b348-71297f9d7358"),
     ("G3.1", "02 Meetings", "Emerging topics working list (Emerging_Topics_Working_Group_Clean_Updated)", "Topic list", "2026-11-04", "Excel", "3b799d7d-5a30-4436-94be-a5d7386e42f4"),
