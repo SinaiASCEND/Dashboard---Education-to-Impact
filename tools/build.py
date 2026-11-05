@@ -87,17 +87,15 @@ def gap_pdf(html):
 
 STYLED = os.path.expanduser("~/Library/CloudStorage/OneDrive-TheMountSinaiHospital/Curricular Affairs - Documents/"
                             "# RPS/# Strategic Plan - From Education to Impact/Styled pages")
-CHARTERS = {"g22-charter.html": "G2.2 Draft Charter (read here)", "g31-charter.html": "G3.1 Draft Charter (read here)"}
-CHARTER_LINKS = [{"name": label, "kind": "Charter", "url": f"docs/{fn}", "format": "Web page",
-                  "note": "Opens in the side panel; the Word copy in SharePoint is the one to edit"} for fn, label in CHARTERS.items()]
+CHARTERS = {"g22-charter.html": "G2.2 Charter", "g31-charter.html": "G3.1 Charter"}
+CHARTER_LINKS = [{"name": label, "kind": "Charter", "url": f"docs/{fn}", "format": "Web page", "date": "2026-11-03",
+                  "note": "Latest version. One charter per group; earlier drafts and the Year 1 charter workbook are not listed"} for fn, label in CHARTERS.items()]
 
 
 # The G3.1 kickoff guides in kickoff/ (live slide reveal). Names start "G3.1" so they list on the G3.1 Documents tab.
 KICKOFF_LINKS = [
     {"name": "G3.1 Kickoff: participant guide (live, Nov 4, 2026)", "kind": "Meeting guide", "date": "2026-11-04",
      "url": "kickoff/", "format": "Web page", "note": "Members follow the slides here; no account needed"},
-    {"name": "G3.1 Kickoff: facilitator guide (access code; reveal buttons)", "kind": "Meeting guide", "date": "2026-11-04",
-     "url": "kickoff/facilitator.html", "format": "Web page", "note": "Co-leads and project manager; Reveal to members beside each slide"},
     {"name": "G3.1 Kickoff: meeting summary and action plan (Nov 4, 2026)", "kind": "Meeting summary", "date": "2026-11-04",
      "url": "kickoff/summary.html", "format": "Web page", "note": "Decisions, topics proposed, actions with owners and dates"},
     {"name": "G3.1 Evidence source: SCOPE survey page (Both groups)", "kind": "Evidence source", "date": "2026-11-05",
@@ -130,20 +128,22 @@ SP_FOLDERS = {
 }
 FOLDER_ORDER = ["01 Charter", "02 Meetings", "02 Meetings › Meeting Minutes", "03 Working Drafts", "Evidence and reports"]
 _SP = [  # (group, folder, name, kind, date, format, SharePoint UniqueId)
-    ("G3.1", "01 Charter", "Year 1 charter workbook (Year1_Charter_G3.1_EmergComp)", "Charter", "2026-11-04", "Excel", "19436ef7-c06e-4ef3-a506-a733f1b3ccee"),
     ("G3.1", "01 Charter", "Charter approval vote (G3.1_Charter_Vote_2026-11)", "Charter vote", "2026-11-05", "Excel", "b110e6c0-e657-4fc1-9973-681e900ed199"),
     ("G3.1", "02 Meetings", "Running agenda", "Agenda", "2026-10-30", "Word", "88c28fff-8412-40a1-aea0-93234c9ea513"),
     ("G3.1", "02 Meetings", "Kickoff slides (Nov 4, 2026)", "Slides", "2026-11-04", "PowerPoint", "41aa74be-01a9-4427-b348-71297f9d7358"),
-    ("G3.1", "02 Meetings", "Emerging topics working list (Emerging_Topics_Working_Group_Clean_Updated)", "Topic list", "2026-11-04", "Excel", "3b799d7d-5a30-4436-94be-a5d7386e42f4"),
-    ("G3.1", "02 Meetings", "Emerging topics without AAMC SCOPE topics", "Topic list", "2026-11-05", "Excel", "cb698f1a-0fd0-40be-adf9-7b0e322f7165"),
+    ("G3.1", "02 Meetings", "Emerging topics list (until the combined G3.1 Emerging Topics Register is uploaded)", "Topic list", "2026-11-05", "Excel", "cb698f1a-0fd0-40be-adf9-7b0e322f7165"),
     ("G3.1", "02 Meetings › Meeting Minutes", "Meeting minutes, Nov 4, 2026 (official, Word)", "Minutes", "2026-11-04", "Word", "e2cfd687-796b-4a41-bcc4-add2fef89a84"),
-    ("G3.1", "03 Working Drafts", "Emerging topics register", "Working draft", "2026-11-04", "Excel", "88724fd8-54f5-4107-882c-47f3bd0608f3"),
-    ("G3.1", "03 Working Drafts", "Emerging topics", "Working draft", "2026-11-04", "Excel", "9048cc4f-5833-4542-94af-c3b57e510046"),
-    ("G2.2", "01 Charter", "Year 1 charter workbook (Year1_Charter_G2.2_CurricGap)", "Charter", "2026-10-27", "Excel", "71d38e73-8be8-4ec2-b7ea-b72ba92f8e56"),
     ("G2.2", "02 Meetings", "Running agenda", "Agenda", "2026-10-30", "Word", "810c00e0-9c24-4a59-bde6-6e274acaa15c"),
 ]
 SP_LINKS = [{"name": f"{g} {n}", "group": g, "folder": f, "kind": k, "date": d, "format": fmt, "url": SP_DOC.format(u),
              "note": "Working group SharePoint (Mount Sinai sign-in)"} for g, f, n, k, d, fmt, u in _SP]
+
+
+def dropped(l):
+    """Only the latest version of each document is listed (user, 2026-11-05): the Word draft charters are reached
+    from the one Charter listing per group, and the Oct 23 working-details snapshot is out of date."""
+    n = l.get("name", "")
+    return (l.get("kind") == "Plan document" and "charter" in n.lower()) or n.startswith("Working details:")
 
 
 def folder_of(l):
@@ -166,6 +166,7 @@ def main():
     file_links = {l["file"]: l["url"] for l in links if l.get("file") and l.get("url")}
 
     links = links + CHARTER_LINKS + KICKOFF_LINKS + SP_LINKS
+    links = [l for l in links if not dropped(l)]
     for l in links:
         l["folder"] = folder_of(l)
         if l.get("name", "").endswith(" draft charter"):  # the editable Word copy lives on the Curricular Affairs SharePoint

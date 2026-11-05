@@ -354,7 +354,7 @@ const TAB_GROUPS = [
 const GROUP_BTNS = [["g22","G2.2","Curriculum Gap Working Group","Curriculum Content Gap Closure"],
                     ["g31","G3.1","Emerging Topics Working Group","Emerging Healthcare Competency Framework"]];
 const GROUP_TAB = {"G2.2":"g22","G3.1":"g31"};
-// Which group a SharePoint file belongs to; files for neither are shared (the working details workbook, Steering Committee papers).
+// Which group a SharePoint file belongs to; files for neither are shared (Steering Committee papers).
 const groupOf = l => /^G2\.2\b|Gap Report/i.test(l.name||"") ? "G2.2" : /^G3\.1\b/i.test(l.name||"") ? "G3.1" : "";
 const TABS = TAB_GROUPS.flatMap(([,t])=>t).concat(GROUP_BTNS.map(([k,,l])=>[k,l]));
 
@@ -409,7 +409,7 @@ function vOverview(){
     <div class="grid g2">${MY_GOALS.map(groupTeaser).join("")}</div></section>
   <section class="card" id="gap-or-emerging"><div class="row spread"><div><h2>Gap or emerging topic?</h2><p class="small muted" style="margin:4px 0 0">Two questions decide which group takes a topic.</p></div><button class="btn" data-panel="rule:two">The two-question rule →</button></div>
     <ol class="steps small" style="margin-top:10px"><li><b>Is the program expected to teach it?</b> Standard 7, USMLE or the national norm names it: G2.2 (gap). No one expects it yet: G3.1 (emerging topic).</li><li><b>How much do we teach now?</b> For an expected topic, this decides whether there is a gap and how large it is.</li></ol></section>
-  <section class="card"><div class="row spread"><div><h2>Shared files</h2><p class="small muted" style="margin:4px 0 0">The working details workbook (members, actions, meetings, minutes and materials for both groups) and the Steering Committee materials open in SharePoint with a Mount Sinai sign-in. Each group's charter is on its own page.</p></div><button class="btn ghost" data-go="files">Shared files</button></div></section>
+  <section class="card"><div class="row spread"><div><h2>Shared files</h2><p class="small muted" style="margin:4px 0 0">Background papers from the Steering Committee, in SharePoint with a Mount Sinai sign-in. Each group's charter and working documents are on its own page.</p></div><button class="btn ghost" data-go="files">Shared files</button></div></section>
   <section class="grid g2">
     <div class="card"><h2 style="margin-bottom:14px">Timeline</h2><div class="timeline">${TIMELINE.map((t,i)=>`<div class="tl ${t[0]<TODAY?"past":""} ${i===nextIdx?"next":""}"><div class="when tnum">${fmt(t[0])}</div><div>${esc(t[1])}</div></div>`).join("")}</div></div>
     <div class="card grid" style="gap:10px;align-content:start"><h2>About the plan</h2>
@@ -803,9 +803,9 @@ function vFiles(){
   const sc=state.links.filter(l=>["Pre-read","Synopsis","Handout"].includes(l.kind)).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
   const row=l=>`<tr><td style="min-width:240px"><b><a href="${esc(l.url)}"${linkAttrs(l.url)}>${esc(l.name)}</a></b></td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td></tr>`;
   const table=rs=>`<div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${rs.map(row).join("")}</tbody></table></div>`;
-  return `<div><h2>Shared files</h2><p class="lede">Files common to both working groups. These open in SharePoint. Sign in with your Mount Sinai account; anyone at Mount Sinai with the link can view them. The working details workbook holds the G2.2 and G3.1 members, actions, meetings, minutes and materials. Each group's charter and documents are on its own page: <a href="#g22" data-go="g22">G2.2</a> · <a href="#g31" data-go="g31">G3.1</a>.</p></div>
-  ${state.links.length?`<section class="grid" style="gap:10px"><h3>Both groups</h3>${table(docs)}</section>
-  <section class="grid" style="gap:10px"><h3>Steering Committee materials</h3>${table(sc)}</section>`:`<div class="empty">No working files listed yet.</div>`}`;
+  return `<div><h2>Shared files</h2><p class="lede">Background files common to both working groups. These open in SharePoint with your Mount Sinai sign-in. Each group's charter and working documents are on its own page: <a href="#g22" data-go="g22">G2.2</a> · <a href="#g31" data-go="g31">G3.1</a>.</p></div>
+  ${state.links.length?`${docs.length?`<section class="grid" style="gap:10px"><h3>Both groups</h3>${table(docs)}</section>`:""}
+  <details class="pri"><summary><div style="flex:1;min-width:220px"><h3>Background: Steering Committee papers, May to October 2026</h3><div class="small muted">${sc.length} pre-reads, synopses and handouts from the plan's development. For reference only.</div></div></summary><div style="padding:12px 18px 16px">${table(sc)}</div></details>`:`<div class="empty">No working files listed yet.</div>`}`;
 }
 /* ---------- members (public: name, title, seat and photo only) ---------- */
 const KORDER={"Co-lead":0,"Project manager":1,"Member":2,"Plan leadership":3};
@@ -902,12 +902,12 @@ function vScope(){
 }
 const VIEWS={overview:vOverview,plan:vPlan,teams:vTeams,members:vMembers,files:vFiles,scope:vScope,g22:()=>vGroup("G2.2"),g31:()=>vGroup("G3.1")};
 function artIndex(){
-  // The key documents (charters, gap report, working details) as chips; shared files and each group's documents have their own pages.
-  const rows=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout"&&!isScopeLink(l)&&!/^0[23]/.test(l.folder||"")&&!/Year 1 charter workbook/.test(l.name||""));
+  // The key documents (the latest charter for each group, the gap report) as chips; shared files and each group's documents have their own pages.
+  const rows=state.links.filter(l=>["Charter","Report"].includes(l.kind)).sort((a,b)=>a.name.localeCompare(b.name));
   if(!rows.length) return "";
   const short=n=>String(n||"").replace(/\s*\((Claude Doc[^)]*|for EEC)\)\s*$/i,"");
   let open=true; try{ open=localStorage.getItem("aixClosed")!=="1"; }catch(_){}
-  return `<details class="aix" id="aix"${open?" open":""}><summary><h2>Key documents</h2><span class="small muted">${rows.length} documents · open in SharePoint</span></summary>
+  return `<details class="aix" id="aix"${open?" open":""}><summary><h2>Key documents</h2><span class="small muted">${rows.length} documents · latest versions</span></summary>
   <div class="grp"><div class="chips">${rows.map(r=>`<a class="chip" href="${esc(r.url)}"${linkAttrs(r.url)} title="${esc(r.notes||r.kind||"")}">${esc(short(r.name))}</a>`).join("")}</div></div></details>`;
 }
 document.addEventListener("toggle",ev=>{ if(ev.target.id==="aix"){ try{ localStorage.setItem("aixClosed",ev.target.open?"0":"1"); }catch(_){} } },true);
