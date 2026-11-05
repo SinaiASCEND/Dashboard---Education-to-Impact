@@ -1,13 +1,19 @@
-"""Make the live (Strategic Plan dashboard) versions of the G3.1 kickoff guides.
+"""Make the live (Strategic Plan dashboard) versions of a working group's kickoff guides.
 
-python3 live_build.py <participant.html> <facilitator.html> <out_dir>
+python3 kickoff_live_build.py <participant.html> <facilitator.html> <out_dir> [room] [folder] [group label] [participant artifact url]
 writes <out_dir>/index.html (members, open) and <out_dir>/facilitator.html (code box, reveal buttons).
+Defaults are the G3.1 kickoff (room g31-kickoff, folder kickoff/). G2.2:
+  ... kickoff-g22 g22-kickoff kickoff-g22 "G2.2 Curriculum Gap Working Group" https://claude.ai/artifact/D1ApPwsH8yEjfnRj4DvB1P
+The room must be listed in ROOMS in the Support site's api/live.js.
 """
 import re, sys, os
 P_IN, F_IN, OUT = sys.argv[1:4]
 LIVE = 'https://ascend-support-dashboard.vercel.app/api/live'
-ROOM = 'g31-kickoff'
-PUBLIC = 'https://sinaiascend.github.io/Dashboard---Education-to-Impact/kickoff/'
+ARGS = sys.argv[4:] + [None] * 4
+ROOM = ARGS[0] or 'g31-kickoff'
+PUBLIC = 'https://sinaiascend.github.io/Dashboard---Education-to-Impact/%s/' % (ARGS[1] or 'kickoff')
+GROUP = ARGS[2] or 'G3.1 Emerging Topics Working Group'
+PG_ART = ARGS[3] or 'https://claude.ai/artifact/WXHAsXH7RCunKq9Eob6BGq'
 HUB = 'https://sinaiascend.github.io/'
 # SHA-256 of the uppercased presenter codes (same hashes as the Support site's api/unlock.js)
 HASHES = ["b9b2b6f01aa767c022763ca563e0882c08635da21f2519dc7b02564aaf0aa9ba",
@@ -101,23 +107,23 @@ f = f.replace('</style>', f_css.replace('%%', '%'), 1)
 f = f.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n' + common_meta, 1)
 f = f.replace('<body>', '''<body class="locked">
 <div id="lock">
-<div class="eyebrow">MD Strategic Plan · G3.1 Emerging Topics Working Group</div>
+<div class="eyebrow">MD Strategic Plan · %s</div>
 <h1>Kickoff facilitator guide</h1>
 <form id="lockform"><label for="lockcode">Enter your access code</label>
 <input id="lockcode" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">
 <button type="submit">Open</button><div class="err" id="lockerr"></div></form>
 <p class="own">Office of Curricular Affairs, Icahn School of Medicine at Mount Sinai · <a href="%s">ASCEND Hub</a></p>
-</div>''' % HUB, 1)
+</div>''' % (GROUP, HUB), 1)
 f = f.replace('<main>', '''<main>
 <div id="ctl"><b id="ctltext">Members see: …</b><button type="button" id="cprev">&#8249; Back</button><button type="button" class="go" id="cnext">Next &#8250;</button><button type="button" id="call">Reveal all</button><button type="button" id="creset">Reset to slide 1</button><div class="msg" id="ctlmsg"></div></div>''', 1)
 f = re.sub(r'<span class="num">Slide (\d+) of (\d+)</span>',
            lambda m: f'<div class="numrow"><span class="num">Slide {m.group(1)} of {m.group(2)}</span><button type="button" class="rv" data-n="{m.group(1)}">Reveal to members</button></div>', f)
-f = f.replace('href="https://claude.ai/artifact/WXHAsXH7RCunKq9Eob6BGq"', f'href="{PUBLIC}"')
+f = f.replace(f'href="{PG_ART}"', f'href="{PUBLIC}"')
 f = f.replace('&#128214; Participant guide</a>', "&#128214; Participant guide (members' link)</a>")
 f_js = """<script>
 (function(){
   var LIVE=%r, ROOM=%r, TOTAL=%d, HASHES=%r;
-  var KEY='g31kickoff-code', code=null, cur=1, all=false;
+  var KEY=%r, code=null, cur=1, all=false;
   function sha(s){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function(b){ return [].map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2);}).join(''); }); }
   function unlock(c){ return sha(c.trim().toUpperCase()).then(function(h){ if(HASHES.indexOf(h)<0) return false; code=c.trim(); try{sessionStorage.setItem(KEY,code);}catch(e){} document.body.classList.remove('locked'); start(); return true; }); }
   document.getElementById('lockform').addEventListener('submit',function(e){ e.preventDefault(); var v=document.getElementById('lockcode').value; unlock(v).then(function(ok){ if(!ok) document.getElementById('lockerr').textContent='That code isn\\u2019t recognized. Check with the Office of Curricular Affairs.'; }); });
@@ -149,7 +155,7 @@ f_js = """<script>
   }
 })();
 </script>
-</body>""" % (LIVE, ROOM, TOTAL, HASHES)
+</body>""" % (LIVE, ROOM, TOTAL, HASHES, ROOM.replace('-', '') + '-code')
 f = f.replace('</body>', f_js, 1)
 open(os.path.join(OUT, 'facilitator.html'), 'w', encoding='utf-8').write(f)
 print('slides', TOTAL, 'reveal buttons', f.count('class="rv"'))
