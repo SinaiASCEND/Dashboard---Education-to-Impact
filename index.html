@@ -347,7 +347,7 @@ function parseLinks(s){
 }
 function linkChips(s){
   const ls=parseLinks(s); if(!ls.length) return "";
-  return `<div class="chips">${ls.map(l=>l.url.startsWith("#")?`<a class="chip int" href="${esc(l.url)}" data-go="${esc(l.url.slice(1))}">${esc(l.label)} →</a>`:`<a class="chip" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join("")}</div>`;
+  return `<div class="chips">${ls.map(l=>l.url.startsWith("#")?`<a class="chip int" href="${esc(l.url)}" data-go="${esc(l.url.slice(1))}">${esc(l.label)} →</a>`:`<a class="chip" href="${esc(l.url)}"${linkAttrs(l.url)}>${esc(l.label)} ↗</a>`).join("")}</div>`;
 }
 function initials(n){return String(n||"").replace(/,.*$/,"").replace(/\(.*?\)/g,"").split(/\s+/).filter(w=>/^[A-Z]/.test(w)).map(w=>w[0]).slice(0,2).join("");}
 function avatar(m,size=64){
@@ -413,7 +413,7 @@ function groupTeaser(gid){
 function groupFiles(gid){
   const rs=state.links.filter(l=>groupOf(l)===gid);
   if(!rs.length) return `<div class="empty">No ${gid} documents listed yet.</div>`;
-  return `<div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${rs.map(l=>`<tr><td style="min-width:240px"><b><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a></b></td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td></tr>`).join("")}</tbody></table></div>`;
+  return `<div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${rs.map(l=>`<tr><td style="min-width:240px"><b><a href="${esc(l.url)}"${linkAttrs(l.url)}>${esc(l.name)}</a></b></td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td></tr>`).join("")}</tbody></table></div>`;
 }
 /* ---------- group pages: a sub-menu per group, details in the side panel ---------- */
 const GROUP_NAME = {"G2.2":"Curriculum Gap Working Group","G3.1":"Emerging Topics Working Group"};
@@ -758,7 +758,7 @@ function listToolbar(kind, extra=""){
 function vFiles(){
   const docs=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout"&&!isScopeLink(l)&&!groupOf(l));
   const sc=state.links.filter(l=>["Pre-read","Synopsis","Handout"].includes(l.kind)).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
-  const row=l=>`<tr><td style="min-width:240px"><b><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a></b></td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td></tr>`;
+  const row=l=>`<tr><td style="min-width:240px"><b><a href="${esc(l.url)}"${linkAttrs(l.url)}>${esc(l.name)}</a></b></td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td></tr>`;
   const table=rs=>`<div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${rs.map(row).join("")}</tbody></table></div>`;
   return `<div><h2>Shared files</h2><p class="lede">Files common to both working groups. These open in SharePoint. Sign in with your Mount Sinai account; anyone at Mount Sinai with the link can view them. The working details workbook holds the G2.2 and G3.1 members, actions, meetings, minutes and materials. Each group's charter and documents are on its own page: <a href="#g22" data-go="g22">G2.2</a> · <a href="#g31" data-go="g31">G3.1</a>.</p></div>
   ${state.links.length?`<section class="grid" style="gap:10px"><h3>Both groups</h3>${table(docs)}</section>
@@ -808,6 +808,8 @@ const SCOPE_PUBLIC = [  // AAMC national reports, hosted on the SCOPE dashboard 
   ["Transition to Residency Courses in U.S. and Canadian Curricula","Data snapshot","Transition_to_Residency_Courses_in_U_S__and_Canadian_Medical_School_Curricula.pdf"]
 ];
 const isScopeLink = l => l.kind==="SCOPE";
+// In-page links (#scope, #g31) switch tabs here; everything else opens in a new tab or the side panel.
+const linkAttrs = u => String(u||"").startsWith("#") ? ` data-go="${esc(String(u).slice(1))}"` : ` target="_blank" rel="noopener"`;
 function vScope(){
   loadScope();
   const head = `<div><h2>SCOPE survey</h2><p class="lede">Mount Sinai's answers to the AAMC Curriculum SCOPE Survey and the national results they are compared with. Use it with the two-question rule: a topic most U.S. schools require is an expected topic (G2.2); a topic new to the survey, or one few schools teach yet, is a signal for G3.1. The full interactive view is the <a href="${SCOPE_SITE}" target="_blank" rel="noopener">SCOPE dashboard ↗</a>.</p></div>`;
@@ -863,7 +865,7 @@ function artIndex(){
   const short=n=>String(n||"").replace(/\s*\((Claude Doc[^)]*|for EEC)\)\s*$/i,"");
   let open=true; try{ open=localStorage.getItem("aixClosed")!=="1"; }catch(_){}
   return `<details class="aix" id="aix"${open?" open":""}><summary><h2>Key documents</h2><span class="small muted">${rows.length} documents · open in SharePoint</span></summary>
-  <div class="grp"><div class="chips">${rows.map(r=>`<a class="chip" href="${esc(r.url)}" target="_blank" rel="noopener" title="${esc(r.notes||r.kind||"")}">${esc(short(r.name))}</a>`).join("")}</div></div></details>`;
+  <div class="grp"><div class="chips">${rows.map(r=>`<a class="chip" href="${esc(r.url)}"${linkAttrs(r.url)} title="${esc(r.notes||r.kind||"")}">${esc(short(r.name))}</a>`).join("")}</div></div></details>`;
 }
 document.addEventListener("toggle",ev=>{ if(ev.target.id==="aix"){ try{ localStorage.setItem("aixClosed",ev.target.open?"0":"1"); }catch(_){} } },true);
 function render(){ document.getElementById("view").innerHTML=(state.loaded&&!/^g\d/.test(tab)?artIndex():"")+VIEWS[tab](); if(panel) drawPanel(); syncHash(); }   // group pages list their own documents

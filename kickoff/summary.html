@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emerging Topics Working Group Kickoff: Summary and Action Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1d2b;--muted:#5d5f6b;--line:#e3e4ea;--bg:#f6f7fa;--card:#fff;--navy:#221F72;--blue:#0073A2;--purple:#68357C;--mag:#D80B8C;--cyan:#00AEEF;
+--say:#0073A2;--say-bg:#eaf5fc;--ask:#D80B8C;--ask-bg:#fdeef7;--emph:#b38600;--emph-bg:#fff8cf;--note:#c0392b;--note-bg:#fdecea;--resp:#1d8a57;--resp-bg:#eaf7f0;--ccm:#d27a00}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+main{max-width:900px;margin:0 auto;padding:22px 16px 64px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--purple);font-weight:600}
+h1{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:clamp(24px,4vw,32px);line-height:1.15;margin:6px 0 10px}
+h2.appx{font-family:'Source Serif 4',Georgia,serif;font-size:22px;margin:34px 0 8px;padding-top:18px;border-top:2px solid var(--line);color:var(--navy)}
+h3{font-size:17px;margin:14px 0 6px;color:var(--navy)}
+p{margin:0 0 9px}
+a{color:var(--blue)}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+.stamp{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:-2px 0 14px;font-size:13px;color:var(--muted)}
+.stamp span:first-child{background:#fff3df;border:1px solid #f3d6a6;color:#7a4b00;padding:3px 10px;border-radius:999px}
+.zoom{background:#eef6fb;border:1px solid #c9e2f1;border-radius:12px;padding:12px 16px;margin:0 0 18px;font-size:14.5px}
+.zoom b.h{display:block;color:var(--navy);font-size:15px;margin-bottom:4px}
+.zoom ol{margin:4px 0 0 18px;padding:0}.zoom li{margin:2px 0}
+.band{display:flex;align-items:center;gap:10px;margin:22px 0 12px;padding:9px 14px;border-radius:10px;background:linear-gradient(90deg,var(--navy),#3b37a0);color:#fff;font-weight:700;font-size:16.5px}
+.band .ic{flex:none;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:16px}
+.band .tm{margin-left:auto;font-size:13px;font-weight:600;background:rgba(255,255,255,.16);padding:2px 10px;border-radius:999px;white-space:nowrap}
+section > .band:first-child{margin-top:2px}
+.pill{display:inline-block;background:#fff3df;color:#7a4b00;border:1px solid #f3d6a6;border-radius:999px;padding:4px 12px;font-weight:700;font-size:14px;margin:0 0 10px}
+.li{display:flex;gap:8px;margin:0 0 5px 4px}.li .mk{flex:none;min-width:1.2em;color:var(--muted)}
+.tw{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}
+tr:first-child td{background:#f1f2f6;font-weight:600}
+table.timeline tr:first-child td{background:var(--navy);color:#fff;border-color:var(--navy)}
+table.timeline tr:nth-child(even) td{background:#f7f8fb}
+table.timeline td:first-child{font-weight:600;color:var(--navy);width:34%}
+table.timeline td:nth-child(2){white-space:nowrap;color:var(--ccm);font-weight:600}
+.call{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.c-em{background:#e9f8fb;color:#0089bd}.c-gap{background:#f1f2f5;color:#4a4b55}.c-hold{background:#fff3df;color:#7a4b00}
+figure.slide{margin:12px 0 14px}
+figure.slide img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px;cursor:zoom-in;box-shadow:0 2px 10px rgba(34,31,114,.07)}
+figure.slide figcaption{font-size:12.5px;color:var(--muted);margin-top:5px}
+figure.slide figcaption::before{content:"\1F5A5  "}
+.box{border-left:4px solid;border-radius:0 10px 10px 0;padding:10px 14px;margin:10px 0}
+.box .tag{display:table;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin:0 0 6px;color:#fff}
+.box p:last-child,.box .li:last-child{margin-bottom:0}
+.b-turn{background:var(--ask-bg);border-color:var(--ask)}.b-turn .tag{background:var(--ask)}
+.b-key{background:var(--emph-bg);border-color:var(--emph)}.b-key .tag{background:var(--emph)}
+.b-note{background:var(--note-bg);border-color:var(--note)}.b-note .tag{background:var(--note)}
+.b-zoom{background:var(--say-bg);border-color:var(--say)}.b-zoom .tag{background:var(--say)}
+mark{background:#ffe27a;color:inherit;font-weight:700;padding:0 2px;border-radius:3px}
+/* topic composer */
+.composer{background:#fff;border:1px dashed #b9cbe0;border-radius:12px;padding:14px 16px;margin:12px 0}
+.composer label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin:8px 0 3px}
+.composer input,.composer textarea{width:100%;font:inherit;font-size:14.5px;padding:7px 10px;border:1px solid #cfd3de;border-radius:8px;background:#fbfbfd}
+.composer textarea{min-height:56px;resize:vertical}
+.composer .out{margin-top:10px;font-size:13.5px;background:#f6f7fa;border:1px solid var(--line);border-radius:8px;padding:8px 10px;white-space:pre-wrap;word-break:break-word;color:#3f4150;min-height:38px}
+.composer button{margin-top:10px;border:0;border-radius:999px;padding:8px 16px;background:var(--navy);color:#fff;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.composer .msg{font-size:13px;color:var(--resp);margin-left:8px}
+.ck{display:flex;gap:8px;background:#f6faf7;border:1px solid #d9eee0;border-radius:8px;padding:7px 10px;margin:0 0 6px}
+.ck .mk{color:var(--resp);font-size:17px;line-height:1.3}
+details{border:1px solid var(--line);border-radius:10px;background:#fff;margin:0 0 10px}
+details summary{cursor:pointer;padding:10px 14px;font-weight:600;color:var(--navy);list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"\25B8  ";color:var(--mag)}
+details[open] summary::before{content:"\25BE  "}
+details .inner{padding:0 14px 12px}
+dl{margin:0}dt{font-weight:700;color:var(--navy);margin-top:10px}dd{margin:2px 0 0 0;color:#3f4150}
+.foot{font-size:12.5px;color:var(--muted);margin-top:8px}
+.lb{position:fixed;inset:0;background:rgba(10,12,40,.85);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.lb[hidden]{display:none}
+.lb img{max-width:100%;max-height:92vh;border-radius:8px;background:#fff}
+.lb button{position:absolute;top:12px;right:12px;border:0;border-radius:999px;padding:6px 14px;background:rgba(255,255,255,.2);color:#fff;font:inherit;cursor:pointer}
+@media (max-width:640px){body{font-size:15.5px}section{padding:14px}.band{font-size:15.5px}table.timeline td:first-child{width:auto}}
+
+.step{margin:0 0 20px}
+.step .num{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 4px}
+.step figure.slide{margin:0 0 8px}
+.chlink{display:inline-block;padding:9px 16px;border-radius:999px;background:#D80B8C;color:#fff !important;font-weight:700;font-size:14px;text-decoration:none}
+.skim{font-size:13px;color:var(--muted);font-style:italic;margin:0 0 8px}
+.fac{display:grid;grid-template-columns:1fr 250px;gap:12px;align-items:start;margin:6px 0 0}
+.fac .say{background:var(--say-bg);border-left:4px solid var(--say);border-radius:0 10px 10px 0;padding:10px 14px}
+.fac .say .tag{display:table;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin:0 0 6px;color:#fff;background:var(--say)}
+.fac .say p{margin:0;font-style:italic}
+.fac .cues{display:flex;flex-direction:column;gap:8px}
+.cue{border-left:4px solid;border-radius:0 8px 8px 0;padding:7px 10px;font-size:13px;line-height:1.45}
+.cue b{display:block;font-size:10px;letter-spacing:.08em;margin-bottom:2px}
+.c-who{background:#fff3df;border-color:#d27a00}.c-who b{color:#d27a00}
+.c-tip{background:#e9f8fb;border-color:#00AEEF}.c-tip b{color:#0089bd}
+.c-warn{background:var(--note-bg);border-color:var(--note)}.c-warn b{color:var(--note)}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}.links .lk{display:inline-block;padding:9px 16px;border-radius:999px;background:var(--navy);color:#fff;font-weight:700;font-size:14px;text-decoration:none}.links .lk:nth-child(2){background:var(--mag)}
+.member-sees{margin:8px 0 0;font-size:13px;color:var(--muted)}
+.member-sees summary{cursor:pointer;color:var(--blue);font-weight:600;padding:0;border:0}
+details.plain{border:0;background:none;margin:0}
+details.plain summary{padding:0}
+@media (max-width:760px){.fac{grid-template-columns:1fr}}
+
+.livepill{position:sticky;top:8px;z-index:20;display:flex;justify-content:center;margin:0 0 12px;pointer-events:none}
+.livepill span{pointer-events:auto;background:#221F72;color:#fff;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(34,31,114,.25)}
+.livepill span i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2fd17a;margin-right:7px;vertical-align:1px}
+.livepill.off span{background:#5d5f6b}.livepill.off span i{background:#c9cbd3}
+body.live .step.locked{display:none}
+body.live section.empty{display:none}
+#comingup{display:none;text-align:center;color:#5d5f6b;font-size:14px;border:2px dashed #d5dbe8;border-radius:12px;padding:16px;margin:0 0 18px;background:#fff}
+body.live #comingup{display:block}
+body.live.allshown #comingup{display:none}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">MD Strategic Plan · G3.1 Emerging Topics Working Group · Session 1</div>
+<h1>Kickoff Meeting: Summary and Action Plan</h1>
+<div class="stamp"><span>&#128197; Wed, Nov 4, 2026 · 3:00–4:00 PM</span><span>Zoom</span><span>Draft summary from the meeting recording; corrections to the co-leads</span></div>
+
+<div class="zoom">
+<b class="h">&#128279; Quick links</b>
+<ol>
+<li><a href="../#g31">Emerging Topics Working Group page</a> on this dashboard (Documents holds the draft charter)</li>
+<li><a href="../#scope">SCOPE survey page</a> on this dashboard (Both groups → SCOPE survey): Mount Sinai's 2026 answers, topics most U.S. schools require that we do not, and the AAMC reports. Full detail: <a href="https://sinaiascend-oca.github.io/Surveys-Benchmarks/scope/" target="_blank" rel="noopener">AAMC Curriculum SCOPE dashboard</a></li>
+<li><a href="../docs/g31-charter.html">G3.1 draft charter</a> (for review and approval)</li>
+<li><a href="./">Kickoff participant guide</a> (the slides and notes from this meeting)</li>
+</ol>
+</div>
+
+<section>
+<div class="band"><span class="ic">&#128101;</span><strong>Attendance</strong></div>
+<div class="tw"><table>
+<tr><td>Role</td><td>Present</td></tr>
+<tr><td>Co-leads</td><td>Rainier Soriano, Ravi Ramaswamy</td></tr>
+<tr><td>Project manager</td><td>Kevin Han</td></tr>
+<tr><td>Members</td><td>Krishna Chokshi, Jared Kutzin, Susan Lerner, David Portnoy, Maaike van Gerwen</td></tr>
+<tr><td>Not present</td><td>Lili Chan</td></tr>
+</table></div>
+</section>
+
+<section>
+<div class="band"><span class="ic">&#128204;</span><strong>Key decisions and agreements</strong></div>
+<div class="li"><span class="mk">1.</span><span><b>Year 1 deliverable.</b> The group builds and pilots a framework for deciding whether a proposed topic belongs in the Mount Sinai MD curriculum. No new curriculum content is developed in Year 1. The framework goes to the EEC around July 2027; Year 2 applies it to a broader set of topics.</span></div>
+<div class="li"><span class="mk">2.</span><span><b>Framework shape.</b> Six steps: intake, gap test, evidence packet, expert input, scoring, and decision. Four possible decisions: integrate, pilot, monitor, or watchful waiting (not now).</span></div>
+<div class="li"><span class="mk">3.</span><span><b>Two-question rule.</b> A topic that LCME, the MEPOs, the AAMC, USMLE/NBME or another national body already expects goes to the Curriculum Gap Working Group (G2.2). G3.1 evaluates topics with no clear requirement. Topics handed to G2.2 still carry their evidence from this group.</span></div>
+<div class="li"><span class="mk">4.</span><span><b>Evidence bar.</b> A topic does not have to meet all 11 framework criteria, but a position statement or external list alone is not enough. The framework includes a stress test, guidance on how to integrate, and trigger indicators for when a monitored topic should be acted on.</span></div>
+<div class="li"><span class="mk">5.</span><span><b>Pilot.</b> The framework is tested on three to five topics the group agrees on. Topics close to an existing requirement are good test cases. AI was named as an example, not yet selected.</span></div>
+<div class="li"><span class="mk">6.</span><span><b>One place for proposals.</b> A shared SharePoint spreadsheet will hold every proposed topic and its evidence. This dashboard is the single place for the group's links.</span></div>
+<div class="li"><span class="mk">7.</span><span><b>Sequence.</b> The charter is approved first; the December meeting is scheduled after that.</span></div>
+</section>
+
+<section>
+<div class="band"><span class="ic">&#128221;</span><strong>Discussion summary</strong></div>
+<h3>Why a strategic plan now</h3>
+<p>The MD program's plan, <i>From Education to Impact</i>, aligns with the institution-wide strategic plan. LCME Element 1.1 (strategic planning) anchors the other standards, and the plan, its goals, milestones and progress data need to be in place for the October 2027 LCME visit. There are 12 Year 1 working groups. Rainier Soriano and Ravi Ramaswamy co-lead G3.1 and G2.2; Kevin Han is project manager for G3.1 and the overall plan.</p>
+<h3>What counts as an emerging topic</h3>
+<p>Knowledge, a capability or a skill that is changing and that graduates will need over the next five to ten years, which the MD program is not yet expected to teach. Internal factors, external factors and the school's mission all bear on the decision. Novelty or Mount Sinai expertise alone does not place a topic in the core curriculum; some topics may suit subspecialty training better.</p>
+<h3>Evidence sources reviewed</h3>
+<p>LCME Standards 6 and 7 (Standard 7 now names specific topics); the 23 MEPOs; AAMC Core EPAs; USMLE and NBME exams (Phase 1 NBME CAS exams, Phase 2 shelf exams, CBSE and CCSE); state and federal mandates; GME expectations; the AAMC Curriculum SCOPE Survey (<a href="../#scope">SCOPE survey page</a> on this dashboard); and stakeholder proposals. The program already holds data for most of these: Step performance, clerkship evaluations, the Graduation Questionnaire and clinical-experience logs.</p>
+<h3>Starting topic list (from published sources)</h3>
+<p>AI and digital health; climate change and health; genomics beyond precision-medicine basics (named as an institutional priority); firearm injury prevention; telehealth (most schools kept it after the pandemic; the program has little now); disability health; occupational health; complementary medicine; veterans' care; medical humanities. Nutrition is tied to state and federal mandates and so is likely a G2.2 topic.</p>
+<h3>Topics members proposed</h3>
+<div class="tw"><table>
+<tr><td>Member</td><td>Topics</td></tr>
+<tr><td>Ravi Ramaswamy</td><td>Innovation and entrepreneurship (THINQ selective, Thrive fellowships)</td></tr>
+<tr><td>Susan Lerner</td><td>Patient safety and quality; how health-system components interact (systems ethics); physician leadership; responding to changes in coverage and access</td></tr>
+<tr><td>David Portnoy</td><td>Leading teams whose advanced practice providers have changing scopes of practice</td></tr>
+<tr><td>Jared Kutzin</td><td>Interprofessional education, safety and quality (possibly G2.2 gaps); health-system resilience and emerging infectious diseases; Medicare, Medicaid, reimbursement and practice management; using personal health data; rebuilding patient trust amid misinformation</td></tr>
+<tr><td>Maaike van Gerwen</td><td>Entrepreneurship as part of leadership; exposomics and personalized medicine; clinical trials</td></tr>
+<tr><td>Krishna Chokshi</td><td>An ethics framework for new technologies: medical aid in dying (now legal in New York), xenotransplantation, longevity medicine, reproductive technologies</td></tr>
+<tr><td>Kevin Han</td><td>Health insurance, reimbursement and value-based care</td></tr>
+</table></div>
+<p>Few member proposals appear on the source-derived list. The group noted that each proposal now needs its source and evidence, which is the purpose of the framework.</p>
+<h3>Charter and tools</h3>
+<p>The draft charter sets out goals, expected outcomes, responsibilities and the action plan; it is on this dashboard under Emerging Topics Working Group → Documents. Members asked for one central place to log proposals so work is not duplicated, and for the relevant links in every task email.</p>
+</section>
+
+<section>
+<div class="band"><span class="ic">&#9989;</span><strong>Action plan</strong></div>
+<p style="color:var(--muted)">Dates marked <i>target</i> were set after the meeting and can be adjusted by the co-leads.</p>
+<div class="tw"><table class="timeline">
+<tr><td>Action</td><td>Due</td><td>Owner</td></tr>
+<tr><td>Send the draft charter and the approval link to members</td><td><i>target</i> Nov 6</td><td>Kevin Han</td></tr>
+<tr><td>Share the AAMC SCOPE Survey link: now on this dashboard as the <a href="../#scope">SCOPE survey page</a> (Both groups → SCOPE survey)</td><td>Nov 5</td><td>Rainier Soriano</td></tr>
+<tr><td>Review the draft charter and vote to approve it</td><td>Nov 10</td><td>All members</td></tr>
+<tr><td>Submit the approved charter to the Core Team</td><td>Nov 13</td><td>Kevin Han, co-leads</td></tr>
+<tr><td>Create the shared SharePoint topic spreadsheet and link it on this dashboard. Proposed columns: topic; where it was seen; why it matters for graduates; evidence source (drop-down: LCME 6/7, MEPO, Core EPA, USMLE/NBME, state or federal law, GME, SCOPE, literature, stakeholder); gap-test result (G2.2 or G3.1)</td><td><i>target</i> Nov 13</td><td>Kevin Han; dashboard link: Rainier Soriano</td></tr>
+<tr><td>Send a Doodle poll for the December meeting once the charter is approved</td><td><i>target</i> Nov 13</td><td>Kevin Han</td></tr>
+<tr><td>Add proposed topics to the spreadsheet, each with why it matters for graduates and its source or evidence (start with the <a href="../#scope">SCOPE survey page</a>: topics most schools require that we do not); keep evidence for topics that go to G2.2</td><td>Before the December meeting</td><td>All members</td></tr>
+<tr><td>Revisit the Year 1 timeline so deliverables are realistic alongside other commitments</td><td>Before the December meeting</td><td>Co-leads, Kevin Han</td></tr>
+<tr><td>Agree the spreadsheet columns and how gap-test findings are recorded</td><td>December meeting</td><td>Working group</td></tr>
+<tr><td>Finalize and rank the topic list; choose three to five pilot topics</td><td>December meeting</td><td>Working group</td></tr>
+<tr><td>Include the relevant links in every task email</td><td>Ongoing</td><td>Kevin Han</td></tr>
+<tr><td>Present the framework to the EEC</td><td>July 2027</td><td>Co-leads</td></tr>
+</table></div>
+</section>
+
+<section>
+<div class="band"><span class="ic">&#10067;</span><strong>Open questions</strong></div>
+<div class="li"><span class="mk">•</span><span>Which three to five topics will pilot the framework.</span></div>
+<div class="li"><span class="mk">•</span><span>How much patient safety and quality, interprofessional education and telehealth the curriculum covers now (a G2.2 gap-test question).</span></div>
+<div class="li"><span class="mk">•</span><span>The scoring method, the evidence required from people proposing a topic, and the difference between monitor and watchful waiting.</span></div>
+<div class="li"><span class="mk">•</span><span>The final spreadsheet columns.</span></div>
+</section>
+</main>
+</body>
+</html>

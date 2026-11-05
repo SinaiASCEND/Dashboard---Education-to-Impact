@@ -96,6 +96,11 @@ KICKOFF_LINKS = [
      "url": "kickoff/", "format": "Web page", "note": "Members follow the slides here; no account needed"},
     {"name": "G3.1 Kickoff: facilitator guide (access code; reveal buttons)", "kind": "Meeting guide", "date": "2026-11-04",
      "url": "kickoff/facilitator.html", "format": "Web page", "note": "Co-leads and project manager; Reveal to members beside each slide"},
+    {"name": "G3.1 Kickoff: meeting summary and action plan (Nov 4, 2026)", "kind": "Meeting summary", "date": "2026-11-04",
+     "url": "kickoff/summary.html", "format": "Web page", "note": "Decisions, topics proposed, actions with owners and dates"},
+    {"name": "G3.1 Evidence source: SCOPE survey page (Both groups)", "kind": "Evidence source", "date": "2026-11-05",
+     "url": "#scope", "format": "Dashboard page",
+     "note": "Mount Sinai's AAMC Curriculum SCOPE answers against the national norm, with the AAMC reports"},
 ]
 
 
