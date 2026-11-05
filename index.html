@@ -111,6 +111,12 @@ body[data-group="g22"]{--bg:var(--g22-bg);--line:var(--g22-line)}
 body[data-group="g31"]{--bg:var(--g31-bg);--line:var(--g31-line)}
 body[data-group="g22"] .gbar{border-bottom:4px solid var(--g22)}
 body[data-group="g31"] .gbar{border-bottom:4px solid var(--g31)}
+.mine[data-g="G2.2"]{border-color:var(--g22-line);box-shadow:inset 5px 0 0 var(--g22);background:linear-gradient(var(--g22-bg),var(--surface) 140px)}
+.mine[data-g="G3.1"]{border-color:var(--g31-line);box-shadow:inset 5px 0 0 var(--g31);background:linear-gradient(var(--g31-bg),var(--surface) 140px)}
+.mine[data-g="G2.2"]>.mono:first-child,.mine[data-g="G2.2"]>.row>.mono{color:var(--g22);font-weight:700}
+.mine[data-g="G2.2"] button.btn.primary{background:var(--g22);border-color:var(--g22)}
+.mine[data-g="G3.1"] button.btn.primary{background:var(--g31);border-color:var(--g31)}
+.mine[data-g="G3.1"]>.mono:first-child,.mine[data-g="G3.1"]>.row>.mono{color:var(--g31);font-weight:700}
 @media (max-width:640px){.gbar-in{grid-template-columns:1fr;gap:8px;padding-block:10px}.gbtn{min-height:64px;padding:12px 16px}.gbtn b{font-size:17px}}
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .eyebrow{font:600 11px/1.3 var(--body);letter-spacing:.14em;text-transform:uppercase;opacity:.8}
@@ -416,7 +422,7 @@ function kpiStatus(id){return state.kpis[id]||{};}
 function groupTeaser(gid){
   const g=GOAL[gid], t=TEAMS.find(x=>x[1]===gid), ks=PLAN.K.filter(k=>k.g===gid), ms=state.milestones.filter(m=>(m.kpi||"").startsWith(gid+"-"));
   const next=ms.filter(m=>!["Done","Dropped"].includes(m.status)).sort((a,b)=>(a.due||"9").localeCompare(b.due||"9"))[0];
-  return `<div class="card mine grid" style="gap:10px">
+  return `<div class="card mine grid" data-g="${gid}" style="gap:10px">
     <span class="mono">${gid} · ${g.p} ${esc(PRI[g.p].name)}</span>
     <h3 style="font:650 19px/1.25 var(--display)">${esc(g.init)}</h3>
     <p class="small" style="margin:0">${esc(g.y1)}</p>
@@ -712,7 +718,7 @@ function syncHash(){
 function goalCard(gid){
   const g=GOAL[gid], t=TEAMS.find(x=>x[1]===gid), ks=PLAN.K.filter(k=>k.g===gid);
   const done=ks.filter(k=>kpiStatus(k.id).status==="Complete").length;
-  return `<div class="card mine grid" style="gap:10px">
+  return `<div class="card mine grid" data-g="${gid}" style="gap:10px">
     <div class="row spread"><span class="mono">${gid} · ${g.p} ${esc(PRI[g.p].name)}</span>${statusPill(g.lock==="Locked"?"Locked":"Open")}</div>
     <h3 style="font:650 19px/1.25 var(--display)">${esc(g.init)}</h3>
     <p class="small" style="margin:0">${esc(g.y1)}</p>
