@@ -340,7 +340,7 @@ const SCHEMAS = {
   ["date","Date","date"],["where","Where it lives","textarea"],["url","Link (https)","text"],["notes","Notes","textarea"]]}
 };
 
-const state = {db:null, actions:[], meetings:[], gaps:[], emerging:[], materials:[], milestones:[], members:[], minutes:[], outbox:[], links:[], kpis:{}, loaded:false, writable:false};
+const state = {db:null, actions:[], meetings:[], gaps:[], emerging:[], materials:[], milestones:[], members:[], minutes:[], outbox:[], links:[], kpis:{}, spFolders:{}, folderOrder:[], loaded:false, writable:false};
 let tab = "overview";
 const TAB_GROUPS = [
   ["Both groups",[["overview","Overview"],["plan","Plan & KPIs"],["teams","Year 1 teams"],["members","Members"],["files","Shared files"],["scope","SCOPE survey"]]]];
@@ -428,13 +428,34 @@ function groupTeaser(gid){
 function groupFiles(gid){
   const rs=state.links.filter(l=>groupOf(l)===gid);
   if(!rs.length) return `<div class="empty">No ${gid} documents listed yet.</div>`;
-  return `<div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th></tr></thead><tbody>${rs.map(l=>`<tr><td style="min-width:240px"><b><a href="${esc(l.url)}"${linkAttrs(l.url)}>${esc(l.name)}</a></b></td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td></tr>`).join("")}</tbody></table></div>`;
+  const order=state.folderOrder.length?state.folderOrder:["01 Charter","02 Meetings","02 Meetings › Meeting Minutes","03 Working Drafts","Evidence and reports"];
+  const short=n=>String(n||"").replace(/^G\d\.\d\s+/,"");
+  const where=l=>/sharepoint\.com/.test(l.url||"")?"SharePoint":String(l.url||"").startsWith("#")?"This dashboard":/^https?:/.test(l.url||"")?"Web":"This dashboard";
+  const row=l=>`<tr><td style="min-width:260px"><b><a href="${esc(l.url)}"${linkAttrs(l.url)}>${esc(short(l.name))}</a></b>${l.note?`<div class="small muted">${esc(l.note)}</div>`:""}</td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td><td class="small">${where(l)}</td></tr>`;
+  const groups=order.map(f=>[f,rs.filter(l=>(l.folder||"Evidence and reports")===f).sort((a,b)=>(a.date||"").localeCompare(b.date||""))]).filter(([,x])=>x.length);
+  const empty=order.filter(f=>/^0\d/.test(f)&&!groups.some(([g])=>g===f));
+  return groups.map(([f,x])=>`<section class="grid" style="gap:8px"><h3 style="margin:6px 0 0">${f.startsWith("0")?"&#128193; ":""}${esc(f)}</h3>
+    <div class="tablebox"><table><thead><tr><th>Document</th><th>Type</th><th>Date</th><th>Format</th><th>Where</th></tr></thead><tbody>${x.map(row).join("")}</tbody></table></div></section>`).join("")
+    + (empty.length?`<p class="small muted" style="margin:4px 0 0">Nothing filed yet under ${empty.map(esc).join(", ")}.</p>`:"");
+}
+function gMinutes(gid){
+  const ms=state.minutes.filter(m=>String(m.group||"").startsWith(gid)).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  const folder=state.spFolders[gid];
+  const head=`<p class="small muted" style="margin:0">Attendance, decisions and action items from each meeting's minutes. The full minutes, with the discussion, are the Word files in the ${folder?`<a href="${esc(folder)}" target="_blank" rel="noopener">${gid} SharePoint folder</a>`:"working group's SharePoint folder"} › 02_Meetings › Meeting Minutes (Mount Sinai sign-in).</p>`;
+  if(!ms.length) return head+`<div class="empty">No ${gid} minutes yet.</div>`;
+  return head+ms.map(m=>`<section class="card grid" style="gap:10px">
+    <div><div class="eyebrow muted">${fmt(m.date)}${m.status?` · ${esc(m.status)}`:""}</div><h3 style="margin:2px 0 0">${esc(m.title||"Meeting")}</h3></div>
+    <div class="small"><b>Present:</b> ${esc((m.present||[]).join("; "))}${(m.absent||[]).length?`<br><b>Not present:</b> ${esc(m.absent.join("; "))}`:""}${m.next?`<br><b>Next meeting:</b> ${esc(m.next)}`:""}</div>
+    ${(m.decision_list||[]).length?`<div><b class="small">Decisions</b><ol class="small" style="margin:4px 0 0 18px;padding:0">${m.decision_list.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`:""}
+    ${(m.action_items||[]).length?`<div><b class="small">Action items</b><div class="tablebox"><table><thead><tr><th>#</th><th>Action</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead><tbody>${m.action_items.map(a=>`<tr><td class="num">${esc(a.n)}</td><td style="min-width:260px">${esc(a.action)}</td><td>${esc(a.owner)}</td><td>${esc(a.due)}</td><td>${statusPill(String(a.status||"").startsWith("Done")?"Done":a.status||"")}${String(a.status||"").startsWith("Done:")?`<div class="small muted">${esc(a.status.slice(5).trim())}</div>`:""}</td></tr>`).join("")}</tbody></table></div></div>`:""}
+    <div class="small">${m.official?`<a class="btn" href="${esc(m.official)}" target="_blank" rel="noopener">Full minutes (Word, SharePoint)</a> `:""}${m.summary_page?`<a class="btn" href="${esc(m.summary_page)}" target="_blank" rel="noopener">Meeting summary page</a>`:""}</div>
+  </section>`).join("");
 }
 /* ---------- group pages: a sub-menu per group, details in the side panel ---------- */
 const GROUP_NAME = {"G2.2":"Curriculum Gap Working Group","G3.1":"Emerging Topics Working Group"};
 const SUBS = {
- "G2.2":[["summary","Summary"],["kpis","KPIs"],["timeline","Timeline"],["roadmap","Roadmap"],["gaps","Gap register"],["rules","Rules"],["docs","Documents"]],
- "G3.1":[["summary","Summary"],["kpis","KPIs"],["timeline","Timeline"],["roadmap","Roadmap"],["criteria","Framework criteria"],["topics","Pilot topics"],["docs","Documents"]]};
+ "G2.2":[["summary","Summary"],["kpis","KPIs"],["timeline","Timeline"],["roadmap","Roadmap"],["gaps","Gap register"],["rules","Rules"],["minutes","Minutes"],["docs","Documents"]],
+ "G3.1":[["summary","Summary"],["kpis","KPIs"],["timeline","Timeline"],["roadmap","Roadmap"],["criteria","Framework criteria"],["topics","Pilot topics"],["minutes","Minutes"],["docs","Documents"]]};
 const sub = {"G2.2":"summary","G3.1":"summary"};
 try{ const s=JSON.parse(localStorage.getItem("fei-sub")||"{}"); for(const g in sub) if(SUBS[g].some(([k])=>k===s[g])) sub[g]=s[g]; }catch(_){}
 const WD = () => state.workdoc || {};
@@ -449,7 +470,7 @@ const kpiLinks = (gid,s) => esc(s).replace(/K(\d)/g,(m,n)=>`<a href="#" data-pan
 function vGroup(gid){
   const g=GOAL[gid], cur=sub[gid];
   rmInit=gid;
-  const body={summary:gSummary,kpis:gKpis,timeline:gTimeline,roadmap:gRoadmap,gaps:gapRegister,rules:gRules,criteria:gCriteria,topics:emergingList,docs:gDocs}[cur](gid);
+  const body={summary:gSummary,kpis:gKpis,timeline:gTimeline,roadmap:gRoadmap,gaps:gapRegister,rules:gRules,criteria:gCriteria,topics:emergingList,minutes:gMinutes,docs:gDocs}[cur](gid);
   return `<div><div class="eyebrow muted">${gid} · ${GROUP_NAME[gid]} · ${g.p} ${esc(PRI[g.p].name)}</div><h2>${esc(g.init)}</h2>
     <p class="small muted" style="margin:6px 0 0">${gid==="G2.2"?"G2.2 takes gaps: topics the program is already expected to teach and falls short on.":"G3.1 takes emerging topics: areas where practice is moving ahead of any settled expectation."} <a href="#" data-panel="rule:two">The two-question rule</a></p></div>
   <nav class="subnav" role="tablist" aria-label="${gid} sections">${SUBS[gid].map(([k,l])=>`<button role="tab" aria-selected="${k===cur}" data-sub="${gid}:${k}">${l}</button>`).join("")}</nav>
@@ -493,7 +514,8 @@ function gRoadmap(gid){
   ${d?`<section class="card rmdetail grid" id="rmdetail" style="gap:12px" aria-live="polite"><h3 style="font:700 18px/1.25 var(--display)">${esc(d.title)}</h3>${d.html}</section>`:""}`;
 }
 function gDocs(gid){
-  return `<p class="small muted" style="margin:0">Open in SharePoint with a Mount Sinai sign-in. Members, actions, meetings and minutes for both groups are in the working details workbook on <a href="#files" data-go="files">Shared files</a>.</p>${groupFiles(gid)}`;
+  const folder=state.spFolders[gid];
+  return `<p class="small muted" style="margin:0">Arranged like the ${folder?`<a href="${esc(folder)}" target="_blank" rel="noopener">${gid} SharePoint folder</a>`:"working group SharePoint folder"} (01 Charter, 02 Meetings, 03 Working Drafts); SharePoint files open with a Mount Sinai sign-in. Minutes are on the <a href="#" data-sub="${gid}:minutes">Minutes</a> tab.</p>${groupFiles(gid)}`;
 }
 function gRules(){
   const cards=[["two","Gap or emerging: the two-question rule","Is the program expected to teach it, and how much is taught now."],
@@ -875,7 +897,7 @@ function vScope(){
 const VIEWS={overview:vOverview,plan:vPlan,teams:vTeams,members:vMembers,files:vFiles,scope:vScope,g22:()=>vGroup("G2.2"),g31:()=>vGroup("G3.1")};
 function artIndex(){
   // The key documents (charters, gap report, working details) as chips; shared files and each group's documents have their own pages.
-  const rows=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout"&&!isScopeLink(l));
+  const rows=state.links.filter(l=>l.kind!=="Pre-read"&&l.kind!=="Synopsis"&&l.kind!=="Handout"&&!isScopeLink(l)&&!/^0[23]/.test(l.folder||"")&&!/Year 1 charter workbook/.test(l.name||""));
   if(!rows.length) return "";
   const short=n=>String(n||"").replace(/\s*\((Claude Doc[^)]*|for EEC)\)\s*$/i,"");
   let open=true; try{ open=localStorage.getItem("aixClosed")!=="1"; }catch(_){}
@@ -980,7 +1002,8 @@ if(location.hash) fromHash();
 renderTabs(); render();
 (function(){
   const D = window.E2I_DATA || {};
-  for(const k of ["gaps","milestones","links","emerging","members"]) state[k] = Array.isArray(D[k]) ? D[k] : [];
+  for(const k of ["gaps","milestones","links","emerging","members","minutes"]) state[k] = Array.isArray(D[k]) ? D[k] : [];
+  state.spFolders = D.spFolders || {}; state.folderOrder = D.folderOrder || [];
   state.workdoc = D.workdoc || {};
   state.kpis = {}; state.outbox = []; state.loaded = true; render();
   const f = document.getElementById("dataAsOf"); if(f && D.generated) f.textContent = "Data as of " + fmt(D.generated) + ". Read-only; updates come from the working groups' project managers.";

@@ -26,6 +26,7 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 GAP_FIELDS = ("topic", "area", "type", "route", "priority", "tier_label", "usmle", "basis", "evidence", "decision", "owner", "notes", "order", "_id")
 MS_FIELDS = ("kpi", "due", "title", "done_when", "status", "owner", "seq", "_id")
+MIN_FIELDS = ("date", "title", "group", "status", "present", "absent", "next", "decision_list", "action_items", "official", "summary_page", "_id")
 MEMBER_FIELDS = ("initiative", "kind", "name", "role", "seat", "photo", "order", "_id")
 SHEETS = {
     "Members": ("members", [("initiative", "Initiative"), ("kind", "Role in this work"), ("name", "Name"), ("role", "Title"),
@@ -62,6 +63,7 @@ def workbook(data, file_links):
                 v = r.get(k, "")
                 if k == "pdf" and v:  # /files/x.pdf on the old site -> its SharePoint link
                     v = file_links.get(os.path.basename(v), os.path.basename(v))
+                if isinstance(v, (list, dict)): v = json.dumps(v, ensure_ascii=False)
                 vals.append("" if v is None else v)
             ws.append(vals)
         for cell in ws[1]:
@@ -118,6 +120,41 @@ def publish_charters():
         open(os.path.join(out, fn), "w", encoding="utf-8").write(html)
 
 
+# The working groups' SharePoint folders (Year 1 Initiatives Working Groups site, set up by Kevin Han).
+# The Documents tab mirrors their folders: 01 Charter, 02 Meetings (+ Meeting Minutes), 03 Working Drafts.
+SP_SITE = "https://mtsinai.sharepoint.com/sites/Year1InitiativesWorkingGroups2"
+SP_DOC = SP_SITE + "/_layouts/15/Doc.aspx?sourcedoc=%7B{}%7D&action=default"
+SP_FOLDERS = {
+    "G3.1": "https://mtsinai.sharepoint.com/:f:/s/Year1InitiativesWorkingGroups2/IgBH-hSShNhETKV8HVP9uYoeASlQ-v2r4e7fM9GV5LjQyCE",
+    "G2.2": SP_SITE + "/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FYear1InitiativesWorkingGroups2%2FShared%20Documents%2F03_Working_Groups%2FP2_G2.2_Curriculum-Gap-Closure",
+}
+FOLDER_ORDER = ["01 Charter", "02 Meetings", "02 Meetings › Meeting Minutes", "03 Working Drafts", "Evidence and reports"]
+_SP = [  # (group, folder, name, kind, date, format, SharePoint UniqueId)
+    ("G3.1", "01 Charter", "Year 1 charter workbook (Year1_Charter_G3.1_EmergComp)", "Charter", "2026-11-04", "Excel", "19436ef7-c06e-4ef3-a506-a733f1b3ccee"),
+    ("G3.1", "02 Meetings", "Running agenda", "Agenda", "2026-10-30", "Word", "88c28fff-8412-40a1-aea0-93234c9ea513"),
+    ("G3.1", "02 Meetings", "Kickoff slides (Nov 4, 2026)", "Slides", "2026-11-04", "PowerPoint", "41aa74be-01a9-4427-b348-71297f9d7358"),
+    ("G3.1", "02 Meetings", "Emerging topics working list (Emerging_Topics_Working_Group_Clean_Updated)", "Topic list", "2026-11-04", "Excel", "3b799d7d-5a30-4436-94be-a5d7386e42f4"),
+    ("G3.1", "02 Meetings", "Emerging topics without AAMC SCOPE topics", "Topic list", "2026-11-05", "Excel", "cb698f1a-0fd0-40be-adf9-7b0e322f7165"),
+    ("G3.1", "02 Meetings › Meeting Minutes", "Meeting minutes, Nov 4, 2026 (official, Word)", "Minutes", "2026-11-04", "Word", "e2cfd687-796b-4a41-bcc4-add2fef89a84"),
+    ("G3.1", "03 Working Drafts", "Emerging topics register", "Working draft", "2026-11-04", "Excel", "88724fd8-54f5-4107-882c-47f3bd0608f3"),
+    ("G3.1", "03 Working Drafts", "Emerging topics", "Working draft", "2026-11-04", "Excel", "9048cc4f-5833-4542-94af-c3b57e510046"),
+    ("G2.2", "01 Charter", "Year 1 charter workbook (Year1_Charter_G2.2_CurricGap)", "Charter", "2026-10-27", "Excel", "71d38e73-8be8-4ec2-b7ea-b72ba92f8e56"),
+    ("G2.2", "02 Meetings", "Running agenda", "Agenda", "2026-10-30", "Word", "810c00e0-9c24-4a59-bde6-6e274acaa15c"),
+]
+SP_LINKS = [{"name": f"{g} {n}", "group": g, "folder": f, "kind": k, "date": d, "format": fmt, "url": SP_DOC.format(u),
+             "note": "Working group SharePoint (Mount Sinai sign-in)"} for g, f, n, k, d, fmt, u in _SP]
+
+
+def folder_of(l):
+    """Place each dashboard link in the SharePoint folder it belongs with."""
+    n, k = l.get("name", ""), l.get("kind", "")
+    if l.get("folder"): return l["folder"]
+    if k in ("Charter", "Plan document") or "charter" in n.lower(): return "01 Charter"
+    if k == "Meeting summary": return "02 Meetings › Meeting Minutes"
+    if k == "Meeting guide": return "02 Meetings"
+    return "Evidence and reports"
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--master", default=MASTER); a = ap.parse_args()
     data = json.load(open(os.path.join(a.master, "e2i-data.json"), encoding="utf-8"))
@@ -127,12 +164,20 @@ def main():
     links = json.load(open(lp, encoding="utf-8")) if os.path.exists(lp) else []
     file_links = {l["file"]: l["url"] for l in links if l.get("file") and l.get("url")}
 
-    links = links + CHARTER_LINKS + KICKOFF_LINKS   # the charters on this site open in the side panel; SharePoint keeps the editable copies
+    links = links + CHARTER_LINKS + KICKOFF_LINKS + SP_LINKS
+    for l in links:
+        l["folder"] = folder_of(l)
+        if l.get("name", "").endswith(" draft charter"):  # the editable Word copy lives on the Curricular Affairs SharePoint
+            l["name"] = l["name"].replace(" draft charter", " Draft charter (Word, Curricular Affairs SharePoint)")
+    # the charters on this site open in the side panel; SharePoint keeps the editable copies
     public = {"generated": data.get("generated", ""),
               "gaps": [{k: g[k] for k in GAP_FIELDS if k in g} for g in data["gaps"]],
               "milestones": [{k: m[k] for k in MS_FIELDS if k in m} for m in data["milestones"]],
               "emerging": [{k: e[k] for k in ("topic", "why", "strength", "status", "pilot", "order", "_id") if k in e} for e in data.get("emerging", [])],
-              "links": [{k: l[k] for k in ("name", "kind", "date", "url", "format", "note") if k in l} for l in links if l.get("url")],
+              "links": [{k: l[k] for k in ("name", "kind", "date", "url", "format", "note", "folder") if k in l} for l in links if l.get("url")],
+              "spFolders": SP_FOLDERS, "folderOrder": FOLDER_ORDER,
+              # Working-group minutes: attendance, decisions and action items (the discussion stays in the Word minutes)
+              "minutes": [{k: m[k] for k in MIN_FIELDS if k in m} for m in data["minutes"] if str(m.get("group", "")).startswith(("G2.2", "G3.1"))],
               # Members tab: name, title, seat and photo only (no email, status or notes; those stay in the workbook)
               "members": [{k: m[k] for k in MEMBER_FIELDS if k in m} for m in data["members"] if m.get("status") != "Declined"],
               # timelines, rules, criteria and resources from the co-leads' working doc (no names or emails)
