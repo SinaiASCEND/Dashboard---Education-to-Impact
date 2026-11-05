@@ -96,6 +96,21 @@ body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);margin:0}
 .gbtn .gsub{font-size:13px;color:var(--muted)}
 .gbtn[aria-current="page"]{background:var(--navy);border-color:var(--navy)}
 .gbtn[aria-current="page"] b,.gbtn[aria-current="page"] .gsub,.gbtn[aria-current="page"] .gid{color:var(--surface)}
+/* Each working group has its own color: its button carries it, and the page background takes it while that group's pages are open */
+:root{--g22:#0b7a8f;--g22-bg:#e2f3f6;--g22-line:#a9d9e2;--g31:#b4166b;--g31-bg:#fbe9f2;--g31-line:#efb9d4}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g22:#5fd0e3;--g22-bg:#0f2a33;--g22-line:#24566a;--g31:#ec5aa3;--g31-bg:#2c1424;--g31-line:#5e2a4a}}
+:root[data-theme="dark"]{--g22:#5fd0e3;--g22-bg:#0f2a33;--g22-line:#24566a;--g31:#ec5aa3;--g31-bg:#2c1424;--g31-line:#5e2a4a}
+.gbtn[data-tab="g22"]{--gc:var(--g22);--gbg:var(--g22-bg);--gl:var(--g22-line)}
+.gbtn[data-tab="g31"]{--gc:var(--g31);--gbg:var(--g31-bg);--gl:var(--g31-line)}
+.gbtn[data-tab]{background:var(--gbg);border-color:var(--gl);box-shadow:inset 6px 0 0 var(--gc)}
+.gbtn[data-tab]:hover{border-color:var(--gc)}
+.gbtn[data-tab] .gid{color:var(--gc)}
+.gbtn[data-tab][aria-current="page"]{background:var(--gc);border-color:var(--gc);box-shadow:none}
+.gbtn[data-tab][aria-current="page"] b,.gbtn[data-tab][aria-current="page"] .gsub,.gbtn[data-tab][aria-current="page"] .gid{color:#fff}
+body[data-group="g22"]{--bg:var(--g22-bg);--line:var(--g22-line)}
+body[data-group="g31"]{--bg:var(--g31-bg);--line:var(--g31-line)}
+body[data-group="g22"] .gbar{border-bottom:4px solid var(--g22)}
+body[data-group="g31"] .gbar{border-bottom:4px solid var(--g31)}
 @media (max-width:640px){.gbar-in{grid-template-columns:1fr;gap:8px;padding-block:10px}.gbtn{min-height:64px;padding:12px 16px}.gbtn b{font-size:17px}}
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .eyebrow{font:600 11px/1.3 var(--body);letter-spacing:.14em;text-transform:uppercase;opacity:.8}
@@ -794,7 +809,7 @@ function artIndex(){
   <div class="grp"><div class="chips">${rows.map(r=>`<a class="chip" href="${esc(r.url)}" target="_blank" rel="noopener" title="${esc(r.notes||r.kind||"")}">${esc(short(r.name))}</a>`).join("")}</div></div></details>`;
 }
 document.addEventListener("toggle",ev=>{ if(ev.target.id==="aix"){ try{ localStorage.setItem("aixClosed",ev.target.open?"0":"1"); }catch(_){} } },true);
-function render(){ document.getElementById("view").innerHTML=(state.loaded&&!/^g\d/.test(tab)?artIndex():"")+VIEWS[tab](); if(panel) drawPanel(); syncHash(); }   // group pages list their own documents
+function render(){ document.body.dataset.group=/^g\d/.test(tab)?tab:""; document.getElementById("view").innerHTML=(state.loaded&&!/^g\d/.test(tab)?artIndex():"")+VIEWS[tab](); if(panel) drawPanel(); syncHash(); }   // group pages list their own documents
 
 /* ---------- interactions ---------- */
 document.getElementById("view").addEventListener("click",e=>{
