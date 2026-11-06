@@ -454,7 +454,7 @@ function gMinutes(gid){
     <div class="small"><b>Present:</b> ${esc((m.present||[]).join("; "))}${(m.absent||[]).length?`<br><b>Not present:</b> ${esc(m.absent.join("; "))}`:""}${m.next?`<br><b>Next meeting:</b> ${esc(m.next)}`:""}</div>
     ${(m.decision_list||[]).length?`<div><b class="small">Decisions</b><ol class="small" style="margin:4px 0 0 18px;padding:0">${m.decision_list.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`:""}
     ${(m.action_items||[]).length?`<div><b class="small">Action items</b><div class="tablebox"><table><thead><tr><th>#</th><th>Action</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead><tbody>${m.action_items.map(a=>`<tr><td class="num">${esc(a.n)}</td><td style="min-width:260px">${esc(a.action)}</td><td>${esc(a.owner)}</td><td>${esc(a.due)}</td><td>${statusPill(String(a.status||"").startsWith("Done")?"Done":a.status||"")}${String(a.status||"").startsWith("Done:")?`<div class="small muted">${esc(a.status.slice(5).trim())}</div>`:""}</td></tr>`).join("")}</tbody></table></div></div>`:""}
-    <div class="small">${m.official?`<a class="btn" href="${esc(m.official)}" target="_blank" rel="noopener">Full minutes (Word, SharePoint)</a> `:""}${m.summary_page?`<a class="btn" href="${esc(m.summary_page)}" target="_blank" rel="noopener">Meeting summary page</a>`:""}</div>
+    <div class="small">${m.official?`<a class="btn" href="${esc(m.official)}" target="_blank" rel="noopener">Full minutes (Word, SharePoint)</a> `:""}${m.summary_page?`<a class="btn" href="${esc(m.summary_page)}" target="_blank" rel="noopener">Meeting summary (quick view)</a>`:""}</div>
   </section>`).join("");
 }
 /* ---------- group pages: a sub-menu per group, details in the side panel ---------- */
@@ -1119,7 +1119,7 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--sunk)} tr.click:focu
   }
   function open(url,label){
     let host=""; try{host=new URL(url).hostname.replace(/^www\./,"")}catch(_){}
-    const own=/\/files\/[\w.-]+\.pdf$/.test(url); if(own) host="PDF stored with this dashboard"; if(!own&&url.startsWith(new URL("docs/",location.href).href)) host="Document on this dashboard";
+    const own=/\/files\/[\w.-]+\.pdf$/.test(url); if(own) host="PDF stored with this dashboard"; if(!own&&["docs/","kickoff/","kickoff-g22/"].some(d=>url.startsWith(new URL(d,location.href).href))) host="Document on this dashboard";
     document.getElementById("lpTitle").textContent=(label||host||"Link").replace(/\s*↗$/,"");
     document.getElementById("lpHost").textContent=host;
     full.href=url;
@@ -1135,10 +1135,10 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--sunk)} tr.click:focu
   document.addEventListener("keydown",ev=>{ if(ev.key==="Escape"&&lp.classList.contains("open")) close(); });
   // The page wrapper opens new-tab links itself, so outside links become in-page links that open this panel.
   function convert(root){
-    (root.querySelectorAll?root:document).querySelectorAll('a[href^="http"], a[href^="/files/"], a[href^="/docs/"], a[href^="docs/"]').forEach(a=>{
+    (root.querySelectorAll?root:document).querySelectorAll('a[href^="http"], a[href^="/files/"], a[href^="/docs/"], a[href^="docs/"], a[href^="kickoff/"], a[href^="kickoff-g22/"]').forEach(a=>{
       if(a.closest(".ascend-mast")||a.closest("#lp")) return;
-      // PDFs and documents served by this site preview in the panel.
-      if(/^\/?(files|docs)\//.test(a.getAttribute("href"))){ a.dataset.ext=new URL(a.getAttribute("href"),location.href).href; a.setAttribute("href","#"); a.removeAttribute("target"); a.title="Opens in a side panel"; return; }
+      // PDFs, documents and meeting pages (minutes summaries, kickoff guides) served by this site preview in the panel.
+      if(/^\/?(files|docs|kickoff|kickoff-g22)\//.test(a.getAttribute("href"))){ a.dataset.ext=new URL(a.getAttribute("href"),location.href).href; a.setAttribute("href","#"); a.removeAttribute("target"); a.title="Opens in a side panel"; return; }
       // Sites that refuse previews (claude.ai, Outlook, SharePoint, Teams…) skip the panel and open in a new tab in one click.
       let h=""; try{h=new URL(a.getAttribute("href")).hostname}catch(_){}
       if(NO_FRAME.test(h)){ a.target="_blank"; a.rel="noopener"; a.title=a.title||"Opens in a new tab"; return; }
