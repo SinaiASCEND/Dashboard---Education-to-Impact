@@ -460,7 +460,7 @@ function gMinutes(gid){
 /* ---------- group pages: a sub-menu per group, details in the side panel ---------- */
 const GROUP_NAME = {"G2.2":"Curriculum Gap Working Group","G3.1":"Emerging Topics Working Group"};
 const SUBS = {
- "G2.2":[["summary","Summary"],["kpis","KPIs"],["timeline","Timeline"],["roadmap","Roadmap"],["gaps","Gap register"],["rules","Rules"],["minutes","Minutes"],["docs","Documents"]],
+ "G2.2":[["summary","Summary"],["kpis","KPIs"],["timeline","Timeline"],["roadmap","Roadmap"],["steps","Review steps"],["gaps","Gap register"],["rules","Rules"],["minutes","Minutes"],["docs","Documents"]],
  "G3.1":[["summary","Summary"],["kpis","KPIs"],["timeline","Timeline"],["roadmap","Roadmap"],["criteria","Framework criteria"],["topics","Pilot topics"],["minutes","Minutes"],["docs","Documents"]]};
 const sub = {"G2.2":"summary","G3.1":"summary"};
 try{ const s=JSON.parse(localStorage.getItem("fei-sub")||"{}"); for(const g in sub) if(SUBS[g].some(([k])=>k===s[g])) sub[g]=s[g]; }catch(_){}
@@ -476,7 +476,7 @@ const kpiLinks = (gid,s) => esc(s).replace(/K(\d)/g,(m,n)=>`<a href="#" data-pan
 function vGroup(gid){
   const g=GOAL[gid], cur=sub[gid];
   rmInit=gid;
-  const body={summary:gSummary,kpis:gKpis,timeline:gTimeline,roadmap:gRoadmap,gaps:gapRegister,rules:gRules,criteria:gCriteria,topics:emergingList,minutes:gMinutes,docs:gDocs}[cur](gid);
+  const body={summary:gSummary,kpis:gKpis,timeline:gTimeline,roadmap:gRoadmap,gaps:gapRegister,steps:gSteps,rules:gRules,criteria:gCriteria,topics:emergingList,minutes:gMinutes,docs:gDocs}[cur](gid);
   return `<div><div class="eyebrow muted">${gid} · ${GROUP_NAME[gid]} · ${g.p} ${esc(PRI[g.p].name)}</div><h2>${esc(g.init)}</h2>
     <p class="small muted" style="margin:6px 0 0">${gid==="G2.2"?"G2.2 takes gaps: topics the program is already expected to teach and falls short on.":"G3.1 takes emerging topics: areas where practice is moving ahead of any settled expectation."} <a href="#" data-panel="rule:two">The two-question rule</a></p></div>
   <nav class="subnav" role="tablist" aria-label="${gid} sections">${SUBS[gid].map(([k,l])=>`<button role="tab" aria-selected="${k===cur}" data-sub="${gid}:${k}">${l}</button>`).join("")}</nav>
@@ -532,6 +532,18 @@ function gRules(){
    ["method","How the gaps were identified","Sources, the Standard 7 check, the societal problems, AAMC SCOPE, tiers and routes."],
    ["resources","Resources required","Staff, committee and stakeholder time for Year 1."]];
   return `<div class="grid g2">${cards.map(([k,t,d])=>`<button class="card rulecard" data-panel="rule:${k}"><b>${t}</b><span class="small muted">${d}</span><span class="small go">Read →</span></button>`).join("")}</div>`;
+}
+function gSteps(){
+  const c=WD().g22_steps, r=WD().g22_status_rules; if(!c) return state.loaded?`<div class="empty">No review steps yet.</div>`:storeNote();
+  const stages=(c.stages||[]).map(([t,ns],i)=>`<div class="stagebox"><b>${esc(t)}</b><span class="small muted">Step${ns.length>1?"s":""} ${ns.join(" and ")}</span></div>${i<c.stages.length-1?'<span class="stagearrow" aria-hidden="true">›</span>':""}`).join("");
+  return `<p class="small muted" style="margin:0;max-width:85ch">${esc(c.intro)}</p>
+  <div class="stagerow">${stages}</div>
+  <div class="tablebox"><table><thead><tr><th class="num">#</th><th>Step</th><th>Question it answers</th><th>Who</th><th>Output</th></tr></thead><tbody>
+  ${c.rows.map((x,i)=>`<tr class="click" tabindex="0" data-panel="g22step:${i}"><td class="num">${i+1}</td><td><b>${esc(x[0])}</b></td><td class="small" style="min-width:200px">${esc(x[1])}</td><td class="small" style="min-width:160px">${esc(x[3])}</td><td class="small" style="min-width:220px">${esc(x[4])}</td></tr>`).join("")}</tbody></table></div>
+  ${r?`<h3 style="margin:6px 0 0">Choosing a status (proposed)</h3><p class="small muted" style="margin:0;max-width:85ch">${esc(r.intro)}</p>
+  <div class="tablebox"><table><thead><tr><th>Status</th><th>When it applies</th><th>What it requires</th><th>Tracked in</th></tr></thead><tbody>
+  ${r.rows.map(x=>`<tr><td><b>${esc(x[0])}</b></td><td class="small" style="min-width:240px">${esc(x[1])}</td><td class="small" style="min-width:200px">${esc(x[2])}</td><td class="small">${esc(x[3])}</td></tr>`).join("")}</tbody></table></div>`:""}
+  <div class="row small" style="gap:8px"><button class="btn" data-panel="rule:two">The two-question rule</button><button class="btn" data-panel="rule:tiers">Priority tiers</button><button class="btn" data-panel="rule:routing">Routing order</button><button class="btn" data-panel="rule:decisions">Decision definitions</button></div>`;
 }
 function gCriteria(){
   const c=WD().criteria; if(!c) return state.loaded?`<div class="empty">No criteria yet.</div>`:storeNote();
@@ -671,6 +683,9 @@ const PANELS={
       ${ms.length?`<h3>Milestones</h3><div class="tablebox"><table><thead><tr><th class="num">#</th><th>Target</th><th>Milestone</th><th>Done when</th><th>Status</th></tr></thead><tbody>${ms.map((m,i)=>`<tr><td class="num">${i+1}</td><td class="num">${fmt(m.due)}</td><td>${esc(m.title)}</td><td class="small">${esc(m.done_when)}</td><td>${statusPill(m.status||"Not started")}</td></tr>`).join("")}</tbody></table></div>`:""}
       ${steps.length?`<h3>Timeline steps</h3>${table(["When","What happens","Who"],steps.map(r=>r.slice(0,3)))}`:""}
       ${stepper("kpi",PLAN.K.filter(x=>x.g===gid).map(x=>x.id),id,"KPI",inline)}`}; },
+  g22step(i){ const rows=WD().g22_steps?.rows||[], r=rows[+i]; if(!r) return null;
+    return {title:`Step ${+i+1}. ${r[0]}`,sub:`Step ${+i+1} of ${rows.length} · G2.2 review steps`,
+      html:dl([["Question it answers",esc(r[1])],["Evidence",esc(r[2])],["Who",esc(r[3])],["Output",esc(r[4])]])+stepper("g22step",rows.map((_,j)=>String(j)),String(i),"step")}; },
   crit(i){ const rows=WD().criteria?.rows||[], r=rows[+i]; if(!r) return null;
     return {title:r[0],sub:`Criterion ${+i+1} of ${rows.length} · G3.1 evaluative framework`,
       html:dl([["Question it answers",esc(r[1])],["Evidence",esc(r[2])],["Who supplies it",esc(r[3])],["Outcome or deliverable",esc(r[4])]])+stepper("crit",rows.map((_,j)=>String(j)),String(i),"criterion")}; },
@@ -1046,6 +1061,10 @@ button.seg[aria-pressed="true"]{background:var(--accent-soft);border-color:var(-
 .sorth span{font-size:9px;opacity:.55} th[aria-sort="ascending"] .sorth,th[aria-sort="descending"] .sorth{color:var(--navy)} th[aria-sort="ascending"] .sorth span,th[aria-sort="descending"] .sorth span{opacity:1}
 .sorth:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 tr.click{cursor:pointer} tr.click:hover td{background:var(--sunk)} tr.click:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
+.stagerow{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px}
+.stagebox{display:grid;gap:2px;padding:8px 12px;border-radius:10px;background:var(--g22-bg,#e2f3f6);border:1px solid var(--g22,#0b7a8f);min-width:120px}
+.stagebox b{color:var(--navy);font:700 14px/1.25 var(--body)}
+.stagearrow{align-self:center;color:var(--g22,#0b7a8f);font-weight:700;font-size:18px}
 .rulecard{display:grid;gap:6px;text-align:left;font:inherit;color:var(--fg);cursor:pointer;align-content:start;width:100%}
 .rulecard:hover{border-color:var(--accent)} .rulecard b{font:700 15px/1.3 var(--body);color:var(--navy)} .rulecard .go{color:var(--accent);font-weight:600}
 .nextlist{margin:0;padding-left:18px;display:grid;gap:6px;font-size:13.5px}
