@@ -101,6 +101,10 @@ KICKOFF_LINKS = [
     {"name": "G2.2 Kickoff: participant guide (live, Nov 12, 2026)", "kind": "Meeting guide",
      "date": "2026-11-05", "url": "kickoff-g22/", "format": "Web page",
      "note": "Members follow the slides here; no account needed"},
+    # The G2.2 deck lives on the Curricular Affairs SharePoint (the G2.2 Year 1 folder is not ours to change).
+    {"name": "G2.2 Kickoff slides (Nov 12, 2026)", "kind": "Slides", "date": "2026-11-05", "folder": "02 Meetings",
+     "url": "https://mtsinai.sharepoint.com/sites/CurricularAffairs/_layouts/15/Doc.aspx?sourcedoc=%7BD2758299-9E78-4DA0-B178-456C1F08BA1C%7D&action=default",
+     "format": "PowerPoint", "note": "Curricular Affairs SharePoint (Mount Sinai sign-in)"},
     {"name": "G3.1 Evidence source: SCOPE survey page (Both groups)", "kind": "Evidence source", "date": "2026-11-05",
      "url": "#scope", "format": "Dashboard page",
      "note": "Mount Sinai's AAMC Curriculum SCOPE answers against the national norm, with the AAMC reports"},
