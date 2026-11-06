@@ -697,16 +697,25 @@ function drawPanel(){
   document.getElementById("ipTitle").textContent=r.title; document.getElementById("ipSub").textContent=r.sub||"";
   document.getElementById("ipBody").innerHTML=r.html; return true;
 }
-// The details open in the page (above the content, scrolling with it) at every screen size, never as a side overlay with its own scroll box.
-const inlinePanel=()=>true;
+// The details open in the page (above the content, scrolling with it), except on the G2.2 Review steps and
+// Gap register tabs (user, 2026-11-06): there they slide in from the right beside the table, like documents
+// and minutes. Phones keep the in-page view everywhere.
+const SIDE_SUBS={"G2.2":["steps","gaps"]};
+const inlinePanel=()=>{ const g=Object.keys(GROUP_TAB).find(x=>GROUP_TAB[x]===tab);
+  return !(g&&(SIDE_SUBS[g]||[]).includes(sub[g])) || matchMedia("(max-width:700px)").matches; };
 let panelFromY=0;
+function placePanel(){
+  const ip=document.getElementById("ip"), slot=document.getElementById("ipSlot");
+  if(inlinePanel()){ if(ip.parentNode!==slot) slot.appendChild(ip); }
+  else if(ip.parentNode===slot) document.body.appendChild(ip);
+}
 function openPanel(spec){
   const i=spec.indexOf(":"), wasOpen=!!panel; panel=[spec.slice(0,i),spec.slice(i+1)];
   if(!drawPanel()) return;
   document.getElementById("ipBody").scrollTop=0;
-  const ip=document.getElementById("ip"), slot=document.getElementById("ipSlot");
-  if(inlinePanel()){ if(ip.parentNode!==slot) slot.appendChild(ip); if(!wasOpen) panelFromY=scrollY; }
-  else if(ip.parentNode===slot) document.body.appendChild(ip);
+  const ip=document.getElementById("ip");
+  if(inlinePanel()&&!wasOpen) panelFromY=scrollY;
+  placePanel();
   ip.classList.add("open"); ip.setAttribute("aria-hidden","false");
   if(inlinePanel()) ip.scrollIntoView({block:"start"});
   if(!wasOpen) document.getElementById("ipX").focus({preventScroll:true});
@@ -926,7 +935,7 @@ function artIndex(){
   <div class="grp"><div class="chips">${rows.map(r=>`<a class="chip" href="${esc(r.url)}"${linkAttrs(r.url)} title="${esc(r.notes||r.kind||"")}">${esc(short(r.name))}</a>`).join("")}</div></div></details>`;
 }
 document.addEventListener("toggle",ev=>{ if(ev.target.id==="aix"){ try{ localStorage.setItem("aixClosed",ev.target.open?"0":"1"); }catch(_){} } },true);
-function render(){ document.body.dataset.group=/^g\d/.test(tab)?tab:""; document.getElementById("view").innerHTML=(state.loaded&&!/^g\d/.test(tab)?artIndex():"")+VIEWS[tab](); if(panel) drawPanel(); syncHash(); }   // group pages list their own documents
+function render(){ document.body.dataset.group=/^g\d/.test(tab)?tab:""; document.getElementById("view").innerHTML=(state.loaded&&!/^g\d/.test(tab)?artIndex():"")+VIEWS[tab](); if(panel&&drawPanel()) placePanel(); syncHash(); }   // group pages list their own documents
 
 /* ---------- interactions ---------- */
 document.getElementById("view").addEventListener("click",e=>{
