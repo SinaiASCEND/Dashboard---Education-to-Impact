@@ -349,7 +349,12 @@ const SCHEMAS = {
 const state = {db:null, actions:[], meetings:[], gaps:[], emerging:[], materials:[], milestones:[], members:[], minutes:[], outbox:[], links:[], kpis:{}, spFolders:{}, folderOrder:[], loaded:false, writable:false};
 let tab = "overview";
 const TAB_GROUPS = [
-  ["Both groups",[["overview","Overview"],["plan","Plan & KPIs"],["teams","Year 1 teams"],["members","Members"],["files","Shared files"],["scope","SCOPE survey"]]]];
+  ["Both groups",[["overview","Home"],["reference","Reference"]]]];
+// Reference holds the whole-plan material; older links (#plan, #scope, #files, #teams, #members) open its sections.
+const REF_SUBS = [["plan","The plan"],["kpis","Plan & KPIs"],["teams","Year 1 teams"],["members","All members"],["scope","SCOPE survey"],["papers","Steering Committee papers"]];
+const REF_ALIAS = {plan:"kpis",teams:"teams",members:"members",files:"papers",scope:"scope"};
+let refSub = "plan";
+function setTab(t){ if(REF_ALIAS[t]){ refSub=REF_ALIAS[t]; t="reference"; } if(!VIEWS[t]) t="overview"; tab=t; }
 // The two working groups are the big buttons under the masthead, not tabs in its nav row.
 const GROUP_BTNS = [["g22","G2.2","Curriculum Gap Working Group","Curriculum Content Gap Closure"],
                     ["g31","G3.1","Emerging Topics Working Group","Emerging Healthcare Competency Framework"]];
@@ -382,7 +387,7 @@ function renderTabs(){
   nav.innerHTML=TAB_GROUPS.map(([g,t])=>`<div class="am-grp" role="presentation"><small aria-hidden="true">${g}</small><div role="presentation">${t.map(([k,l])=>`<button role="tab" aria-selected="${k===tab}" data-tab="${k}">${l}</button>`).join("")}</div></div>`).join("");
   document.getElementById("gbar").innerHTML=`<div class="wrap gbar-in">${GROUP_BTNS.map(([k,id,name,init])=>`<button class="gbtn" data-tab="${k}" aria-current="${k===tab?"page":"false"}"><span class="gid">${id}</span><b>${name}</b><span class="gsub">${init}</span></button>`).join("")}</div>`;
 }
-const pickTab=e=>{const b=e.target.closest("[data-tab]"); if(!b) return; tab=b.dataset.tab; try{localStorage.setItem("fei-tab",tab)}catch(_){} renderTabs(); render(); };
+const pickTab=e=>{const b=e.target.closest("[data-tab]"); if(!b) return; setTab(b.dataset.tab); try{localStorage.setItem("fei-tab",tab)}catch(_){} renderTabs(); render(); };
 document.getElementById("tabs").addEventListener("click",pickTab);
 document.getElementById("gbar").addEventListener("click",pickTab);
 
@@ -459,11 +464,12 @@ function gMinutes(gid){
 }
 /* ---------- group pages: a sub-menu per group, details in the side panel ---------- */
 const GROUP_NAME = {"G2.2":"Curriculum Gap Working Group","G3.1":"Emerging Topics Working Group"};
-const SUBS = {
- "G2.2":[["summary","Summary"],["kpis","KPIs"],["timeline","Timeline"],["roadmap","Roadmap"],["steps","Review steps"],["gaps","Gap register"],["rules","Rules"],["minutes","Minutes"],["docs","Documents"]],
- "G3.1":[["summary","Summary"],["kpis","KPIs"],["timeline","Timeline"],["roadmap","Roadmap"],["criteria","Framework criteria"],["topics","Pilot topics"],["minutes","Minutes"],["docs","Documents"]]};
-const sub = {"G2.2":"summary","G3.1":"summary"};
-try{ const s=JSON.parse(localStorage.getItem("fei-sub")||"{}"); for(const g in sub) if(SUBS[g].some(([k])=>k===s[g])) sub[g]=s[g]; }catch(_){}
+const SIX = [["year","This year"],["topics","Topics"],["review","How we review"],["meetings","Meetings & minutes"],["actions","Action items"],["docs","Documents"]];
+const SUBS = {"G2.2":SIX,"G3.1":SIX};
+const SUB_ALIAS = {summary:"year",kpis:"year",timeline:"year",roadmap:"year",steps:"review",rules:"review",criteria:"review",gaps:"topics",minutes:"meetings"};
+const subOf = k => SUB_ALIAS[k]||k;
+const sub = {"G2.2":"year","G3.1":"year"};
+try{ const s=JSON.parse(localStorage.getItem("fei-sub")||"{}"); for(const g in sub){ const k=subOf(s[g]); if(SUBS[g].some(([x])=>x===k)) sub[g]=k; } }catch(_){}
 const WD = () => state.workdoc || {};
 const tierOf = g => String(g.priority)==="1"?"1":String(g.priority)==="2"?"2":"Monitor";
 const TIER_LABEL = {"1":"Tier 1 · required now","2":"Tier 2 · required by 2027–28","Monitor":"Monitor"};
@@ -476,7 +482,7 @@ const kpiLinks = (gid,s) => esc(s).replace(/K(\d)/g,(m,n)=>`<a href="#" data-pan
 function vGroup(gid){
   const g=GOAL[gid], cur=sub[gid];
   rmInit=gid;
-  const body={summary:gSummary,kpis:gKpis,timeline:gTimeline,roadmap:gRoadmap,gaps:gapRegister,steps:gSteps,rules:gRules,criteria:gCriteria,topics:emergingList,minutes:gMinutes,docs:gDocs}[cur](gid);
+  const body={year:gYear,topics:gTopics,review:gReview,meetings:gMeetings,actions:gActions,docs:gDocs}[cur](gid);
   return `<div><div class="eyebrow muted">${gid} · ${GROUP_NAME[gid]} · ${g.p} ${esc(PRI[g.p].name)}</div><h2>${esc(g.init)}</h2>
     <p class="small muted" style="margin:6px 0 0">${gid==="G2.2"?"G2.2 takes gaps: topics the program is already expected to teach and falls short on.":"G3.1 takes emerging topics: areas where practice is moving ahead of any settled expectation."} <a href="#" data-panel="rule:two">The two-question rule</a></p></div>
   <nav class="subnav" role="tablist" aria-label="${gid} sections">${SUBS[gid].map(([k,l])=>`<button role="tab" aria-selected="${k===cur}" data-sub="${gid}:${k}">${l}</button>`).join("")}</nav>
@@ -521,7 +527,7 @@ function gRoadmap(gid){
 }
 function gDocs(gid){
   const folder=state.spFolders[gid];
-  return `<p class="small muted" style="margin:0">Arranged like the ${folder?`<a href="${esc(folder)}" target="_blank" rel="noopener">${gid} SharePoint folder</a>`:"working group SharePoint folder"} (01 Charter, 02 Meetings, 03 Working Drafts); SharePoint files open with a Mount Sinai sign-in. Minutes are on the <a href="#" data-sub="${gid}:minutes">Minutes</a> tab.</p>${groupFiles(gid)}`;
+  return `<p class="small muted" style="margin:0">Arranged like the ${folder?`<a href="${esc(folder)}" target="_blank" rel="noopener">${gid} SharePoint folder</a>`:"working group SharePoint folder"} (01 Charter, 02 Meetings, 03 Working Drafts); SharePoint files open with a Mount Sinai sign-in. Minutes and meeting materials are on the <a href="#" data-sub="${gid}:meetings">Meetings &amp; minutes</a> tab.</p>${groupFiles(gid)}`;
 }
 function gRules(){
   const cards=[["two","Gap or emerging: the two-question rule","Is the program expected to teach it, and how much is taught now."],
@@ -627,6 +633,144 @@ function aamcSeries(){
   <div class="tablebox"><table><thead><tr><th>Competency set</th><th>Published</th><th>What it covers</th><th>Home on this dashboard</th></tr></thead><tbody>
   ${s.rows.map(r=>`<tr><td style="min-width:200px"><b><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.set)}</a></b></td><td class="small" style="white-space:nowrap">${esc(r.published)}</td><td class="small" style="min-width:260px">${esc(r.scope)}</td><td class="small" style="min-width:200px">${esc(r.home)}</td></tr>`).join("")}</tbody></table></div>`;
 }
+
+/* ---------- member layout (Nov 2026): six tabs per group ---------- */
+// Meetings of each working group. Materials are matched from the SharePoint list by date (same day) and group.
+const MEETINGS = [
+  {g:"G3.1", date:"2026-11-04", title:"Kickoff", when:"Wed Nov 4, 3:00–4:00 PM · Zoom", status:"Held"},
+  {g:"G3.1", date:"2026-12-01", title:"Meeting 2: final topic list and priorities", when:"December, date to be set (a monthly Monday, 1:00–2:00 PM, proposed)", status:"To schedule", tbd:true},
+  {g:"G2.2", date:"2026-11-12", title:"Kickoff", when:"Thu Nov 12, 10:00–11:00 AM · Zoom", status:"Scheduled", agenda:"Review the charter; classify the gaps Address, Defer or Monitor"},
+  {g:"G2.2", date:"2026-12-01", title:"Meeting 2: the gap review process", when:"Early December, date to be set", status:"To schedule", tbd:true, agenda:"The written review process; topics assigned to gap owners"},
+  {g:"G2.2", date:"2027-01-15", title:"Gap owners present the evidence", when:"Jan 15, 2027", status:"Planned", agenda:"Evidence for the Tier 1 and Tier 2 gaps"}
+];
+const nextMeeting = gid => MEETINGS.filter(m=>m.g===gid&&m.status!=="Held").sort((a,b)=>a.date.localeCompare(b.date))[0];
+// Gap-register entries that name a data pattern, not a topic: they stay with G2.2. Every other Monitor gap is proposed for the G3.1 topic list.
+const DATA_PATTERN = /^(Clerkship shelf content patterns|MEPOs reinforced only in Phase 1|Pediatric case content in Phase 1)/i;
+const isMonitorTopic = r => tierOf(r)==="Monitor" && !DATA_PATTERN.test(r.topic||"");
+const G31_CALLS = "Address, Defer, Monitor or No action";
+
+function gYear(gid){
+  const g=GOAL[gid], t=TEAMS.find(x=>x[1]===gid), ks=PLAN.K.filter(k=>k.g===gid);
+  const ms=state.milestones.filter(m=>(m.kpi||"").startsWith(gid+"-")&&!["Done","Dropped"].includes(m.status)&&(m.due||"")>=TODAY).sort((a,b)=>a.due.localeCompare(b.due)).slice(0,3);
+  const nm=nextMeeting(gid);
+  const ps=state.members.filter(m=>(m.initiative||"").includes(gid)).sort(byPerson);
+  return `<section class="card grid" style="gap:8px"><div class="eyebrow muted">Year 1 goal</div><p style="margin:0;font-size:16px">${esc(g.y1)}</p>
+      <div class="small muted">Co-leads ${esc(t[2])} &amp; ${esc(t[3])} · PM ${esc(t[4])}</div></section>
+  <section class="grid g2">
+    <div class="card grid" style="gap:8px;align-content:start"><h3>Next meeting</h3>${nm?`<p style="margin:0"><b>${esc(nm.title)}</b></p><div class="small">${esc(nm.when)}</div>${nm.agenda?`<div class="small muted">${esc(nm.agenda)}</div>`:""}`:`<p class="small muted" style="margin:0">None set yet.</p>`}
+      <div><button class="btn" data-sub="${gid}:meetings">Meetings &amp; minutes</button></div></div>
+    <div class="card grid" style="gap:8px;align-content:start"><h3>Coming up</h3>
+      ${ms.length?`<ol class="nextlist">${ms.map(m=>`<li><span class="small muted tnum">${fmt(m.due)}</span> · <a href="#" data-panel="kpi:${m.kpi}">${esc(m.title)}</a></li>`).join("")}</ol>`:`<p class="small muted" style="margin:0">Nothing due.</p>`}
+      <div><button class="btn" data-sub="${gid}:actions">Action items</button></div></div>
+  </section>
+  <section class="grid" style="gap:8px"><h3>Year 1 deliverables</h3><p class="small muted" style="margin:0">Select one to see its milestones.</p>
+    <div class="tablebox"><table><thead><tr><th>Deliverable</th><th>What it means</th><th>Done by</th></tr></thead><tbody>
+    ${ks.map(k=>`<tr class="click" tabindex="0" data-panel="kpi:${k.id}"><td style="min-width:180px"><span class="mono">${k.id}</span> <b>${esc(k.name)}</b></td><td class="small" style="min-width:260px">${esc(k.text)}</td><td class="small">${esc(k.doneBy||fmt(k.due))}</td></tr>`).join("")}</tbody></table></div></section>
+  <section class="grid" style="gap:8px"><h3>Timeline</h3>${gTimeline(gid)}</section>
+  ${ps.length?`<section class="grid" style="gap:12px"><h3>Members</h3><div class="people">${ps.map(personCard).join("")}</div></section>`:""}`;
+}
+
+function gTopics(gid){
+  if(!state.loaded) return storeNote();
+  if(gid==="G2.2"){
+    const req=state.gaps.filter(r=>tierOf(r)!=="Monitor").sort((a,b)=>(a.order??99)-(b.order??99));
+    const dp=state.gaps.filter(r=>DATA_PATTERN.test(r.topic||"")).sort((a,b)=>(a.order??99)-(b.order??99));
+    const row=r=>`<tr class="click" tabindex="0" data-panel="gap:${r._id}"><td style="min-width:220px"><b>${esc(r.topic)}</b></td><td>${tierPill(tierOf(r))}</td><td class="small">${esc(r.owner||"To assign")}</td><td class="small">${esc(r.route||"—")}</td><td>${statusPill(r.decision||"Pending")}</td></tr>`;
+    const tbl=rs=>`<div class="tablebox"><table><thead><tr><th>Gap</th><th>Tier</th><th>Owner</th><th>Route</th><th>Decision</th></tr></thead><tbody>${rs.map(row).join("")}</tbody></table></div>`;
+    return `<p class="small muted" style="margin:0;max-width:85ch">The Tier 1 and Tier 2 gaps come first: gap owners bring the evidence on Jan 15, 2027, and the working group recommends Address, Defer or Monitor for each. Select a gap for its evidence, USMLE alignment and route.</p>
+    ${tbl(req)}
+    ${dp.length?`<h3>Monitor gaps that stay with this group</h3><p class="small muted" style="margin:0">Data patterns, not topics.</p>${tbl(dp)}`:""}
+    <p class="note">The other Monitor gaps are topics. They are proposed for the <a href="#" data-sub="G3.1:topics">Emerging Topics Working Group's topic list</a>; each working group confirms the placement.</p>
+    <details class="pri"><summary><div style="flex:1;min-width:220px"><h3>Full gap register</h3><div class="small muted">Every gap, all tiers, with filters.</div></div></summary><div style="padding:12px 18px 16px" class="grid">${gapRegister()}</div></details>`;
+  }
+  const em=state.emerging.slice().sort((a,b)=>(a.order??99)-(b.order??99)).map(r=>({topic:r.topic,src:"Emerging topics list",why:r.why,status:r.status||"Candidate"}));
+  // Other topics already placed with G2.2 (on its register, or assigned to it) are not repeated here.
+  const other=(WD().other_topics||[]).filter(r=>!/G2\.2/.test(r[2]||"")).map(r=>({topic:r[0],src:r[1],why:r[2],status:"Candidate"}));
+  const mon=state.gaps.filter(isMonitorTopic).sort((a,b)=>(a.order??99)-(b.order??99)).map(r=>({topic:r.topic,src:"Gap register (Monitor), proposed move",why:r.evidence||r.basis||"",status:"Proposed",gap:r._id}));
+  const rows=[...em,...other,...mon];
+  return `<p class="small muted" style="margin:0;max-width:85ch">One list of the topics under consideration. Every topic is run through the framework; the group's call for each is ${G31_CALLS}. Placements from the gap register are proposed until both working groups confirm them. <a href="#" data-panel="rule:two">The two-question rule</a></p>
+  <div class="tablebox"><table><thead><tr><th>Topic</th><th>Listed in</th><th>Why it is on the list</th><th>Status</th><th>Group's call</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr${r.gap?` class="click" tabindex="0" data-panel="gap:${r.gap}"`:""}><td style="min-width:200px"><b>${esc(r.topic)}</b></td><td class="small">${esc(r.src)}</td><td class="small" style="min-width:240px">${esc(r.why||"—")}</td><td>${statusPill(r.status)}</td><td class="small">—</td></tr>`).join("")}</tbody></table></div>
+  ${aamcSeries()}`;
+}
+
+function gReview(gid){
+  if(gid==="G2.2") return `${gSteps()}<h3>Rules</h3>${gRules()}`;
+  return `<section class="card grid" style="gap:8px"><h3>The group's call on each topic</h3><p class="small" style="margin:0">${G31_CALLS}: the same labels the Curriculum Gap Working Group uses, plus No action.</p>
+    <div class="row small" style="gap:8px"><button class="btn" data-panel="rule:decisions">Decision definitions</button><button class="btn" data-panel="rule:two">The two-question rule</button></div></section>
+  <h3>Framework criteria</h3>${gCriteria()}`;
+}
+
+function meetingFiles(gid,m){
+  return state.links.filter(l=>groupOf(l)===gid&&/^02 Meetings/.test(l.folder||"")&&((l.date||"")===m.date||(m.title==="Kickoff"&&/kickoff/i.test(l.name||""))));
+}
+function gMeetings(gid){
+  const rows=MEETINGS.filter(m=>m.g===gid).sort((a,b)=>a.date.localeCompare(b.date));
+  const used=new Set(rows.filter(m=>!m.tbd).flatMap(m=>meetingFiles(gid,m)));
+  const other=state.links.filter(l=>groupOf(l)===gid&&/^02 Meetings/.test(l.folder||"")&&!used.has(l));
+  const chip=l=>`<a class="chip" href="${esc(l.url)}"${linkAttrs(l.url)}>${esc(String(l.name||"").replace(/^G\d\.\d\s+/,""))}</a>`;
+  return `<div class="tablebox"><table><thead><tr><th>When</th><th>Meeting</th><th>Status</th><th>Materials</th></tr></thead><tbody>
+  ${rows.map(m=>{const fs=m.tbd?[]:meetingFiles(gid,m); return `<tr><td class="small" style="min-width:150px">${esc(m.when)}</td><td style="min-width:200px"><b>${esc(m.title)}</b>${m.agenda?`<div class="small muted">${esc(m.agenda)}</div>`:""}</td><td>${statusPill(m.status)}</td><td><div class="chips">${fs.map(chip).join("")||'<span class="small muted">—</span>'}</div></td></tr>`;}).join("")}</tbody></table></div>
+  ${other.length?`<div class="grid" style="gap:6px"><h3>Running documents</h3><div class="chips">${other.map(chip).join("")}</div></div>`:""}
+  <h3>Minutes</h3>${gMinutes(gid)}`;
+}
+
+let actWho="all";
+function gActions(gid){
+  if(!state.loaded) return storeNote();
+  const items=[];
+  state.minutes.filter(m=>String(m.group||"").startsWith(gid)).forEach(m=>(m.action_items||[]).forEach(a=>items.push({...a,meeting:m.title||"Meeting",date:m.date})));
+  const done=a=>String(a.status||"").startsWith("Done");
+  const names=[...new Set(items.flatMap(a=>String(a.owner||"").split(/\s*(?:,|;|\band\b|&)\s*/).map(x=>x.trim()).filter(Boolean)))].sort();
+  if(actWho!=="all"&&!names.includes(actWho)) actWho="all";
+  const rs=items.filter(a=>actWho==="all"||String(a.owner||"").includes(actWho)).sort((a,b)=>(done(a)-done(b))||(b.date||"").localeCompare(a.date||"")||(a.n||0)-(b.n||0));
+  if(!items.length) return `<div class="empty">No action items yet. They are added from each meeting's minutes.</div>`;
+  return `<div class="row spread"><p class="small muted" style="margin:0">From each meeting's minutes. ${items.filter(a=>!done(a)).length} open of ${items.length}.</p>
+    <label class="row small" style="gap:6px">Show <select id="fWho"><option value="all">Everyone's items</option>${names.map(n=>`<option value="${esc(n)}" ${actWho===n?"selected":""}>${esc(n)}</option>`).join("")}</select></label></div>
+  <div class="tablebox"><table><thead><tr><th>Action</th><th>Owner</th><th>Due</th><th>Status</th><th>From</th></tr></thead><tbody>
+  ${rs.length?rs.map(a=>`<tr><td style="min-width:260px">${esc(a.action)}</td><td class="small">${esc(a.owner||"—")}</td><td class="small">${esc(a.due||"—")}</td><td>${statusPill(done(a)?"Done":a.status||"Open")}${String(a.status||"").startsWith("Done:")?`<div class="small muted">${esc(a.status.slice(5).trim())}</div>`:""}</td><td class="small">${esc(a.meeting)}, ${fmt(a.date)}</td></tr>`).join(""):`<tr><td colspan="5" class="muted">No items for this name.</td></tr>`}</tbody></table></div>`;
+}
+
+function homeCard(gid){
+  const g=GOAL[gid], nm=nextMeeting(gid), k=GROUP_TAB[gid];
+  return `<div class="card mine grid" data-g="${gid}" style="gap:10px">
+    <span class="mono">${gid} · ${esc(GROUP_NAME[gid])}</span>
+    <h3 style="font:650 19px/1.25 var(--display)">${esc(g.init)}</h3>
+    <p class="small" style="margin:0">${esc(g.y1)}</p>
+    <div class="small"><b>Next meeting:</b> ${nm?`${esc(nm.title)} · ${esc(nm.when)}`:"to be set"}</div>
+    <div class="row small" style="gap:6px"><button class="btn primary" data-go="${k}">Open →</button>${SIX.slice(1).map(([s,l])=>`<button class="btn" data-sub="${gid}:${s}">${l}</button>`).join("")}</div>
+  </div>`;
+}
+function vHome(){
+  return `<div><h2>From Education to Impact: Year 1 working groups</h2><p class="lede">Pick your working group. Each group page has the same six tabs: This year, Topics, How we review, Meetings &amp; minutes, Action items and Documents.</p></div>
+  <section class="grid g2">${MY_GOALS.map(homeCard).join("")}</section>
+  <section class="card" id="gap-or-emerging"><div class="row spread"><div><h2>Gap or emerging topic?</h2><p class="small muted" style="margin:4px 0 0">Two questions decide which group takes a topic.</p></div><button class="btn" data-panel="rule:two">The two-question rule →</button></div>
+    <ol class="steps small" style="margin-top:10px"><li><b>Is the program expected to teach it?</b> Expected: Curriculum Gap Working Group. Not expected yet: Emerging Topics Working Group.</li><li><b>How much do we teach now?</b> For an expected topic, this decides whether there is a gap and how large it is.</li></ol></section>
+  <section class="card"><div class="row spread"><div><h2>Reference</h2><p class="small muted" style="margin:4px 0 0">The whole plan, Year 1 teams, the SCOPE survey and the Steering Committee papers.</p></div><button class="btn ghost" data-go="reference">Reference</button></div></section>`;
+}
+function vPlanAbout(){
+  const nextIdx=TIMELINE.findIndex(t=>t[0]>=TODAY);
+  return `<section class="card"><div class="eyebrow muted">Strategic identity statement · approved, not open for revision</div><p class="identity">${esc(IDENTITY)}</p></section>
+  <section class="grid g4">
+    <div class="card stat"><b>5</b><span>priorities (P1–P5)</span></div>
+    <div class="card stat"><b>18</b><span>goals; 6 deferred to Year 2+</span></div>
+    <div class="card stat"><b>12</b><span>Year 1 initiatives and working groups</span></div>
+    <div class="card stat"><b>32</b><span>draft key performance indicators, to be confirmed by each group</span></div>
+  </section>
+  <section class="grid g2">
+    <div class="card"><h2 style="margin-bottom:14px">Plan timeline</h2><div class="timeline">${TIMELINE.map((t,i)=>`<div class="tl ${t[0]<TODAY?"past":""} ${i===nextIdx?"next":""}"><div class="when tnum">${fmt(t[0])}</div><div>${esc(t[1])}</div></div>`).join("")}</div></div>
+    <div class="card grid" style="gap:10px;align-content:start"><h2>About the plan</h2>
+      <button class="card rulecard" data-panel="rule:fit"><b>How the plan fits together</b><span class="small muted">Priorities, goals, initiatives, charters, milestones and reporting.</span><span class="small go">Read →</span></button>
+      <button class="card rulecard" data-panel="rule:comments"><b>Open comment results</b><span class="small muted">Aug 17 – Sept 10: 34 substantive responses.</span><span class="small go">Read →</span></button>
+    </div>
+  </section>`;
+}
+function vReference(){
+  const body={plan:vPlanAbout,kpis:vPlan,teams:vTeams,members:vMembers,scope:vScope,papers:vFiles}[refSub]();
+  return `<div><div class="eyebrow muted">Reference · both groups</div><h2>The plan and background</h2></div>
+  <nav class="subnav" role="tablist" aria-label="Reference sections">${REF_SUBS.map(([k,l])=>`<button role="tab" aria-selected="${k===refSub}" data-ref="${k}">${l}</button>`).join("")}</nav>
+  ${body}`;
+}
 /* ---------- details side panel ---------- */
 let panel=null;
 const dl = pairs => `<dl class="dl">${pairs.filter(([,v])=>v).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>`;
@@ -716,17 +860,18 @@ function closePanel(){ const was=!!panel; panel=null; const ip=document.getEleme
 document.getElementById("ip").addEventListener("click",e=>{
   if(e.target.closest("#ipX")){ closePanel(); return; }
   const pn=e.target.closest("[data-panel]"); if(pn){ e.preventDefault(); openPanel(pn.dataset.panel); return; }
-  const go=e.target.closest("[data-go]"); if(go&&VIEWS[go.dataset.go]){ e.preventDefault(); closePanel(); tab=go.dataset.go; renderTabs(); render(); scrollTo(0,0); }
+  const go=e.target.closest("[data-go]"); if(go&&(VIEWS[go.dataset.go]||REF_ALIAS[go.dataset.go])){ e.preventDefault(); closePanel(); setTab(go.dataset.go); renderTabs(); render(); scrollTo(0,0); }
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&panel&&!document.getElementById("lp")?.classList.contains("open")) closePanel(); });
 function fromHash(){
-  const [h,s]=location.hash.slice(1).split("/"); if(!VIEWS[h]) return false;
-  tab=h; const g=Object.keys(GROUP_TAB).find(x=>GROUP_TAB[x]===h);
+  const [h,s0]=location.hash.slice(1).split("/"); if(!VIEWS[h]&&!REF_ALIAS[h]) return false;
+  setTab(h); if(h==="reference"&&REF_SUBS.some(([k])=>k===s0)) refSub=s0;
+  const g=Object.keys(GROUP_TAB).find(x=>GROUP_TAB[x]===h), s=subOf(s0);
   if(g&&s&&SUBS[g].some(([k])=>k===s)) sub[g]=s;
   return true;
 }
 function syncHash(){
-  const g=Object.keys(GROUP_TAB).find(x=>GROUP_TAB[x]===tab), h=g?`#${tab}/${sub[g]}`:"";
+  const g=Object.keys(GROUP_TAB).find(x=>GROUP_TAB[x]===tab), h=g?`#${tab}/${sub[g]}`:tab==="reference"?`#reference/${refSub}`:"";
   if(location.hash!==h) history.replaceState(null,"",h||location.pathname+location.search);
 }
 
@@ -847,8 +992,8 @@ const SCOPE_SITE = "https://sinaiascend-oca.github.io/Surveys-Benchmarks/scope/"
 let SCOPE = null, scopeErr = null, scopeLoading = false;
 function loadScope(){
   if(SCOPE||scopeLoading||scopeErr) return; scopeLoading=true;
-  import(SCOPE_SITE+"scope-data.js").then(m=>{ SCOPE=m.default; scopeLoading=false; if(tab==="scope") render(); })
-    .catch(e=>{ scopeErr=String((e&&e.message)||e); scopeLoading=false; if(tab==="scope") render(); });
+  import(SCOPE_SITE+"scope-data.js").then(m=>{ SCOPE=m.default; scopeLoading=false; if(tab==="reference"&&refSub==="scope") render(); })
+    .catch(e=>{ scopeErr=String((e&&e.message)||e); scopeLoading=false; if(tab==="reference"&&refSub==="scope") render(); });
 }
 const SCOPE_PUBLIC = [  // AAMC national reports, hosted on the SCOPE dashboard (public)
   ["SCOPE Aggregate Statistics Report 2024–25","National report","SCOPE_Aggregate_Report_2024-2025.pdf"],
@@ -915,7 +1060,7 @@ function vScope(){
       <div><h4 style="margin:0 0 8px">We require it; most schools do not (${ahead.length})</h4><p class="small muted" style="margin:0 0 8px">Where Mount Sinai is ahead of the norm.</p>${natTable(ahead,'<span class="pill ok">Required</span>',"None this year.")}</div>
     </div></section>`+docs;
 }
-const VIEWS={overview:vOverview,plan:vPlan,teams:vTeams,members:vMembers,files:vFiles,scope:vScope,g22:()=>vGroup("G2.2"),g31:()=>vGroup("G3.1")};
+const VIEWS={overview:vHome,reference:vReference,g22:()=>vGroup("G2.2"),g31:()=>vGroup("G3.1")};
 function artIndex(){
   // The key documents (the latest charter for each group, the gap report) as chips; shared files and each group's documents have their own pages.
   const rows=state.links.filter(l=>["Charter","Report"].includes(l.kind)).sort((a,b)=>a.name.localeCompare(b.name));
@@ -926,7 +1071,7 @@ function artIndex(){
   <div class="grp"><div class="chips">${rows.map(r=>`<a class="chip" href="${esc(r.url)}"${linkAttrs(r.url)} title="${esc(r.notes||r.kind||"")}">${esc(short(r.name))}</a>`).join("")}</div></div></details>`;
 }
 document.addEventListener("toggle",ev=>{ if(ev.target.id==="aix"){ try{ localStorage.setItem("aixClosed",ev.target.open?"0":"1"); }catch(_){} } },true);
-function render(){ document.body.dataset.group=/^g\d/.test(tab)?tab:""; document.getElementById("view").innerHTML=(state.loaded&&!/^g\d/.test(tab)?artIndex():"")+VIEWS[tab](); if(panel) drawPanel(); syncHash(); }   // group pages list their own documents
+function render(){ document.body.dataset.group=/^g\d/.test(tab)?tab:""; document.getElementById("view").innerHTML=(state.loaded&&tab==="overview"?artIndex():"")+VIEWS[tab](); if(panel) drawPanel(); syncHash(); }   // group pages list their own documents
 
 /* ---------- interactions ---------- */
 document.getElementById("view").addEventListener("click",e=>{
@@ -936,7 +1081,8 @@ document.getElementById("view").addEventListener("click",e=>{
   const gt=e.target.closest("[data-gtier]"); if(gt){gapTier=gt.dataset.gtier; render(); return;}
   const gs=e.target.closest("[data-gsort]"); if(gs){const k=gs.dataset.gsort; gapSort=gapSort.key===k?{key:k,dir:-gapSort.dir}:{key:k,dir:1}; render(); document.querySelector(`[data-gsort="${k}"]`)?.focus({preventScroll:true}); return;}
   const jp=e.target.closest("[data-jump]"); if(jp){e.preventDefault(); document.getElementById(jp.dataset.jump)?.scrollIntoView({behavior:"smooth",block:"start"}); return;}
-  const go=e.target.closest("[data-go]"); if(go){e.preventDefault(); if(VIEWS[go.dataset.go]){tab=go.dataset.go; renderTabs(); render(); const a=go.dataset.anchor&&document.getElementById(go.dataset.anchor); if(a) a.scrollIntoView({block:"start"}); else scrollTo(0,0);} return;}
+  const rf=e.target.closest("[data-ref]"); if(rf){e.preventDefault(); refSub=rf.dataset.ref; render(); return;}
+  const go=e.target.closest("[data-go]"); if(go){e.preventDefault(); if(VIEWS[go.dataset.go]||REF_ALIAS[go.dataset.go]){setTab(go.dataset.go); renderTabs(); render(); const a=go.dataset.anchor&&document.getElementById(go.dataset.anchor); if(a) a.scrollIntoView({block:"start"}); else scrollTo(0,0);} return;}
   const tk=e.target.closest("[data-tlk]"); if(tk){const id=tk.dataset.tlk; rmOpen.has(id)?rmOpen.delete(id):rmOpen.add(id); render(); document.querySelector(`[data-tlk="${id}"]`)?.focus({preventScroll:true}); return;}
   const ta=e.target.closest("[data-tlall]"); if(ta){const gs=rmInit==="both"?["G2.2","G3.1"]:[rmInit]; PLAN.K.filter(k=>gs.includes(k.g)).forEach(k=>ta.dataset.tlall==="open"?rmOpen.add(k.id):rmOpen.delete(k.id)); render(); return;}
   const cp=e.target.closest("[data-copy]"); if(cp){const el=document.getElementById(cp.dataset.copy); const v=el.value; try{navigator.clipboard.writeText(v).then(()=>toast("Copied"),()=>{el.select();toast("Selected; press Cmd+C to copy");});}catch(_){el.select();toast("Selected; press Cmd+C to copy");} return;}
@@ -953,6 +1099,7 @@ document.getElementById("view").addEventListener("change",async e=>{
   if(t.id==="fFocus"){planFocus=t.checked; render(); return;}
   if(t.id==="fRm"){rmInit=t.value; render(); return;}
   if(t.id==="fRoute"){gapRoute=t.value; render(); return;}
+  if(t.id==="fWho"){actWho=t.value; render(); return;}
   if(t.id==="fMin"){minGroup=t.value; render(); return;}
   if(t.id==="mAud"){mailAud=t.value; render(); document.getElementById("mailbox")?.scrollIntoView({block:"start"}); return;}
   if(t.id==="mTpl"){mailTpl=t.value; render(); document.getElementById("mailbox")?.scrollIntoView({block:"start"}); return;}
@@ -1018,7 +1165,7 @@ function openKpiNote(id){
 }
 
 /* ---------- boot ---------- */
-try{const t=({gaps:"g22",roadmap:"overview",milestones:"overview"})[localStorage.getItem("fei-tab")]||localStorage.getItem("fei-tab"); if(t&&VIEWS[t]) tab=t;}catch(_){}
+try{const t=({gaps:"g22",roadmap:"overview",milestones:"overview"})[localStorage.getItem("fei-tab")]||localStorage.getItem("fei-tab"); if(t&&(VIEWS[t]||REF_ALIAS[t])) setTab(t);}catch(_){}
 if(location.hash) fromHash();
 renderTabs(); render();
 (function(){
