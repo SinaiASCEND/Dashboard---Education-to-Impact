@@ -5,9 +5,11 @@ indicators, the roadmap and milestones for the Year 1 initiatives G2.2 Curriculu
 G3.1 Emerging Healthcare Competency Framework, the Year 1 teams and the G2.2 gap register.
 
 - Hosting: GitHub Pages from `main` (public). Open it from the ASCEND Hub.
-- Pages: shared pages for both working groups (Overview, Plan & KPIs, Year 1 teams, Shared files) and one page
-  per group (G2.2 Gap Closure, G3.1 Competency Framework) with its outcome, key performance indicators, roadmap,
-  milestones, documents and, for G2.2, the gap register.
+- Pages: Home (the two working groups and their next meetings), Reference (the whole plan, Plan & KPIs, Year 1
+  teams, all members, SCOPE survey, Steering Committee papers) and one page per group with the same six tabs:
+  This year, Topics, How we review, Meetings & minutes, Action items, Documents. Meetings are listed in `MEETINGS`
+  in index.html; action items come from each minutes record. Old links (#scope, #g31/minutes, …) still open the
+  matching tab.
 - Working files stay in SharePoint: the draft charters, the gap report, Steering Committee materials and a
   working details workbook (members, actions, meetings, minutes, materials). They open with "People in Mount
   Sinai can view" links, so only with a Mount Sinai sign-in. A file whose name starts with G2.2 or G3.1 (and the
