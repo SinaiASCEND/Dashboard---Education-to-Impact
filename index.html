@@ -647,7 +647,12 @@ const nextMeeting = gid => MEETINGS.filter(m=>m.g===gid&&m.status!=="Held").sort
 // Gap-register entries that name a data pattern, not a topic: hidden on this site (user, 2026-11-12: "only topics").
 // Every other Monitor gap is proposed for the G3.1 topic list.
 const DATA_PATTERN = /^(Clerkship shelf content patterns|MEPOs reinforced only in Phase 1|Pediatric case content in Phase 1)/i;
-const isMonitorTopic = r => tierOf(r)==="Monitor" && !DATA_PATTERN.test(r.topic||"");
+// Nutrition-related Monitor gaps stay with G2.2, beside Nutrition (user, 2026-11-12: "move nutrition out of emerging").
+const NUTRITION_G22 = /^(Obesity and bariatric care|Lifestyle medicine)/i;
+const isMonitorTopic = r => tierOf(r)==="Monitor" && !DATA_PATTERN.test(r.topic||"") && !NUTRITION_G22.test(r.topic||"");
+// Topic sign-up (claude.ai page; members pick 2 or 3 topics: Absolutely, Yes or If I have to)
+const SIGNUP_URL = "https://claude.ai/artifact/WeC26jP7t3fVuCnHCEtTxu";
+const signupBox = gid => `<div style="background:var(--surface);border:1px solid var(--line);box-shadow:inset 4px 0 0 var(--accent);padding:12px 14px;border-radius:8px;margin:0 0 12px"><p style="margin:0"><b>Sign up for 2 or 3 topics.</b> Pick from the ${gid} list and say how keen you are on each: Absolutely, Yes or If I have to. <a href="${SIGNUP_URL}${gid==="G3.1"?"#g31":"#g22"}" target="_blank" rel="noopener">Open the topic sign-up</a> (claude.ai, Mount Sinai sign-in).</p></div>`;
 const G31_CALLS = "Address, Defer, Monitor or No action";
 
 function gYear(gid){
@@ -677,7 +682,7 @@ function gTopics(gid){
     const req=state.gaps.filter(r=>tierOf(r)!=="Monitor").sort((a,b)=>(a.order??99)-(b.order??99));
     const row=r=>`<tr class="click" tabindex="0" data-panel="gap:${r._id}"><td style="min-width:220px"><b>${esc(r.topic)}</b></td><td>${tierPill(tierOf(r))}</td><td class="small">${esc(r.owner||"To assign")}</td><td class="small">${esc(r.route||"—")}</td><td>${statusPill(r.decision||"Pending")}</td></tr>`;
     const tbl=rs=>`<div class="tablebox"><table><thead><tr><th>Gap</th><th>Tier</th><th>Owner</th><th>Route</th><th>Decision</th></tr></thead><tbody>${rs.map(row).join("")}</tbody></table></div>`;
-    return `<p class="small muted" style="margin:0;max-width:85ch">The Tier 1 and Tier 2 gaps come first: gap owners bring the evidence on Jan 15, 2027, and the working group recommends Address, Defer or Monitor for each. Select a gap to open its side panel: what the topic is, what the LCME asks for, where it is taught and assessed now, and its route. Gaps that fall under an Area of Curricular Concentration (AOC) go to CIS instead of PCCS or CCS.</p>
+    return `${signupBox("G2.2")}<p class="small muted" style="margin:0;max-width:85ch">The Tier 1 and Tier 2 gaps come first: gap owners bring the evidence on Jan 15, 2027, and the working group recommends Address, Defer or Monitor for each. Select a gap to open its side panel: what the topic is, what the LCME asks for, where it is taught and assessed now, and its route. Gaps that fall under an Area of Curricular Concentration (AOC) go to CIS instead of PCCS or CCS.</p>
     ${tbl(req)}
     <p class="note">The Monitor gaps are in the full gap register below and are proposed for the <a href="#" data-sub="G3.1:topics">Emerging Topics Working Group's topic list</a>; each working group confirms the placement.</p>
     <details class="pri"><summary><div style="flex:1;min-width:220px"><h3>Full gap register</h3><div class="small muted">Every gap, all tiers, with filters.</div></div></summary><div style="padding:12px 18px 16px" class="grid">${gapRegister()}</div></details>`;
@@ -687,7 +692,7 @@ function gTopics(gid){
   const other=(WD().other_topics||[]).filter(r=>!/G2\.2/.test(r[2]||"")).map(r=>({topic:r[0],src:r[1],why:r[2],status:"Candidate"}));
   const mon=state.gaps.filter(isMonitorTopic).sort((a,b)=>(a.order??99)-(b.order??99)).map(r=>({topic:r.topic,src:"Gap register (Monitor), proposed move",why:r.evidence||r.basis||"",status:"Proposed",gap:r._id}));
   const rows=[...em,...other,...mon];
-  return `<p class="small muted" style="margin:0;max-width:85ch">One list of the topics under consideration. Every topic is run through the framework; the group's call for each is ${G31_CALLS}. Placements from the gap register are proposed until both working groups confirm them. <a href="#" data-panel="rule:two">The two-question rule</a></p>
+  return `${signupBox("G3.1")}<p class="small muted" style="margin:0;max-width:85ch">One list of the topics under consideration. Every topic is run through the framework; the group's call for each is ${G31_CALLS}. Placements from the gap register are proposed until both working groups confirm them. <a href="#" data-panel="rule:two">The two-question rule</a></p>
   <div class="tablebox"><table><thead><tr><th>Topic</th><th>Listed in</th><th>Why it is on the list</th><th>Status</th><th>Group's call</th></tr></thead><tbody>
   ${rows.map(r=>`<tr${r.gap?` class="click" tabindex="0" data-panel="gap:${r.gap}"`:""}><td style="min-width:200px"><b>${esc(r.topic)}</b></td><td class="small">${esc(r.src)}</td><td class="small" style="min-width:240px">${esc(r.why||"—")}</td><td>${statusPill(r.status)}</td><td class="small">—</td></tr>`).join("")}</tbody></table></div>
   ${aamcSeries()}`;
