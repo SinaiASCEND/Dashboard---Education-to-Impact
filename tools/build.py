@@ -101,6 +101,9 @@ KICKOFF_LINKS = [
     {"name": "G2.2 Kickoff: participant guide (live, Nov 12, 2026)", "kind": "Meeting guide",
      "date": "2026-11-05", "url": "kickoff-g22/", "format": "Web page",
      "note": "Members follow the slides here; no account needed"},
+    {"name": "G2.2 Kickoff: facilitator guide (Nov 12, 2026)", "kind": "Meeting guide",
+     "date": "2026-11-05", "url": "kickoff-g22/facilitator.html", "format": "Web page",
+     "note": "For the co-leads and project manager: run-of-show and slide reveal; access code needed"},
     # The G2.2 deck lives on the Curricular Affairs SharePoint (the G2.2 Year 1 folder is not ours to change).
     {"name": "G2.2 Kickoff slides (Nov 12, 2026)", "kind": "Slides", "date": "2026-11-05", "folder": "02 Meetings",
      "url": "https://mtsinai.sharepoint.com/sites/CurricularAffairs/_layouts/15/Doc.aspx?sourcedoc=%7BD2758299-9E78-4DA0-B178-456C1F08BA1C%7D&action=default",
