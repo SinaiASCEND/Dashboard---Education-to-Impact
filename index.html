@@ -674,13 +674,11 @@ function gTopics(gid){
   if(!state.loaded) return storeNote();
   if(gid==="G2.2"){
     const req=state.gaps.filter(r=>tierOf(r)!=="Monitor").sort((a,b)=>(a.order??99)-(b.order??99));
-    const dp=state.gaps.filter(r=>DATA_PATTERN.test(r.topic||"")).sort((a,b)=>(a.order??99)-(b.order??99));
     const row=r=>`<tr class="click" tabindex="0" data-panel="gap:${r._id}"><td style="min-width:220px"><b>${esc(r.topic)}</b></td><td>${tierPill(tierOf(r))}</td><td class="small">${esc(r.owner||"To assign")}</td><td class="small">${esc(r.route||"—")}</td><td>${statusPill(r.decision||"Pending")}</td></tr>`;
     const tbl=rs=>`<div class="tablebox"><table><thead><tr><th>Gap</th><th>Tier</th><th>Owner</th><th>Route</th><th>Decision</th></tr></thead><tbody>${rs.map(row).join("")}</tbody></table></div>`;
     return `<p class="small muted" style="margin:0;max-width:85ch">The Tier 1 and Tier 2 gaps come first: gap owners bring the evidence on Jan 15, 2027, and the working group recommends Address, Defer or Monitor for each. Select a gap to open its side panel: what the topic is, what the LCME asks for, where it is taught and assessed now, and its route. Gaps that fall under an Area of Curricular Concentration (AOC) go to CIS instead of PCCS or CCS.</p>
     ${tbl(req)}
-    ${dp.length?`<h3>Monitor gaps that stay with this group</h3><p class="small muted" style="margin:0">Data patterns, not topics.</p>${tbl(dp)}`:""}
-    <p class="note">The other Monitor gaps are topics. They are proposed for the <a href="#" data-sub="G3.1:topics">Emerging Topics Working Group's topic list</a>; each working group confirms the placement.</p>
+    <p class="note">Every Monitor gap is in the full gap register below. Those that are topics are proposed for the <a href="#" data-sub="G3.1:topics">Emerging Topics Working Group's topic list</a>; each working group confirms the placement.</p>
     <details class="pri"><summary><div style="flex:1;min-width:220px"><h3>Full gap register</h3><div class="small muted">Every gap, all tiers, with filters.</div></div></summary><div style="padding:12px 18px 16px" class="grid">${gapRegister()}</div></details>`;
   }
   const em=state.emerging.slice().sort((a,b)=>(a.order??99)-(b.order??99)).map(r=>({topic:r.topic,src:"Emerging topics list",why:r.why,status:r.status||"Candidate"}));
