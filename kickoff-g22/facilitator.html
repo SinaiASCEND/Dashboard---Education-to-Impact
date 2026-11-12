@@ -312,7 +312,7 @@ button.rv:disabled{opacity:.6;cursor:wait}
 </script>
 <script>
 (function(){
-  var LIVE='https://ascend-support-dashboard.vercel.app/api/live', ROOM='g22-kickoff', TOTAL=37, HASHES=['b9b2b6f01aa767c022763ca563e0882c08635da21f2519dc7b02564aaf0aa9ba', 'a42b8352b4c79f604f3ca0f8c703cbd08f648e86099ec682ce98bd4a11286741'];
+  var LIVE='https://ascend-support-dashboard.vercel.app/api/live', ROOM='g22-kickoff', TOTAL=37, HASHES=['b9b2b6f01aa767c022763ca563e0882c08635da21f2519dc7b02564aaf0aa9ba', 'a42b8352b4c79f604f3ca0f8c703cbd08f648e86099ec682ce98bd4a11286741', 'ee45ffc0ee400b2323fd007fb2c4b77477bb1fbbc9dff74b8dbae47a17b7f728'];
   var KEY='g22kickoff-code', code=null, cur=1, all=false;
   function sha(s){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function(b){ return [].map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2);}).join(''); }); }
   function unlock(c){ return sha(c.trim().toUpperCase()).then(function(h){ if(HASHES.indexOf(h)<0) return false; code=c.trim(); try{sessionStorage.setItem(KEY,code);}catch(e){} document.body.classList.remove('locked'); start(); return true; }); }

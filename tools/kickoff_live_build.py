@@ -17,7 +17,8 @@ PG_ART = ARGS[3] or 'https://claude.ai/artifact/WXHAsXH7RCunKq9Eob6BGq'
 HUB = 'https://sinaiascend.github.io/'
 # SHA-256 of the uppercased presenter codes (same hashes as the Support site's api/unlock.js)
 HASHES = ["b9b2b6f01aa767c022763ca563e0882c08635da21f2519dc7b02564aaf0aa9ba",
-          "a42b8352b4c79f604f3ca0f8c703cbd08f648e86099ec682ce98bd4a11286741"]
+          "a42b8352b4c79f604f3ca0f8c703cbd08f648e86099ec682ce98bd4a11286741",
+          "ee45ffc0ee400b2323fd007fb2c4b77477bb1fbbc9dff74b8dbae47a17b7f728"]   # + strategic plan working-group code (owner, 2026-11-12)
 
 p = open(P_IN, encoding='utf-8').read()
 f = open(F_IN, encoding='utf-8').read()
