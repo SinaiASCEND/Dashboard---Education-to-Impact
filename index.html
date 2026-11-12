@@ -677,7 +677,7 @@ function gTopics(gid){
     const dp=state.gaps.filter(r=>DATA_PATTERN.test(r.topic||"")).sort((a,b)=>(a.order??99)-(b.order??99));
     const row=r=>`<tr class="click" tabindex="0" data-panel="gap:${r._id}"><td style="min-width:220px"><b>${esc(r.topic)}</b></td><td>${tierPill(tierOf(r))}</td><td class="small">${esc(r.owner||"To assign")}</td><td class="small">${esc(r.route||"—")}</td><td>${statusPill(r.decision||"Pending")}</td></tr>`;
     const tbl=rs=>`<div class="tablebox"><table><thead><tr><th>Gap</th><th>Tier</th><th>Owner</th><th>Route</th><th>Decision</th></tr></thead><tbody>${rs.map(row).join("")}</tbody></table></div>`;
-    return `<p class="small muted" style="margin:0;max-width:85ch">The Tier 1 and Tier 2 gaps come first: gap owners bring the evidence on Jan 15, 2027, and the working group recommends Address, Defer or Monitor for each. Select a gap for its evidence, USMLE alignment and route.</p>
+    return `<p class="small muted" style="margin:0;max-width:85ch">The Tier 1 and Tier 2 gaps come first: gap owners bring the evidence on Jan 15, 2027, and the working group recommends Address, Defer or Monitor for each. Select a gap to open its side panel: what the topic is, what the LCME asks for, where it is taught and assessed now, and its route. Gaps that fall under an Area of Curricular Concentration (AOC) go to CIS instead of PCCS or CCS.</p>
     ${tbl(req)}
     ${dp.length?`<h3>Monitor gaps that stay with this group</h3><p class="small muted" style="margin:0">Data patterns, not topics.</p>${tbl(dp)}`:""}
     <p class="note">The other Monitor gaps are topics. They are proposed for the <a href="#" data-sub="G3.1:topics">Emerging Topics Working Group's topic list</a>; each working group confirms the placement.</p>
@@ -813,9 +813,30 @@ const RULE_PANELS={
   fit(){ return {title:"How the plan fits together",sub:"From Education to Impact",html:PLAN_FIT}; },
   comments(){ return {title:"Open comment results",sub:"Aug 17 – Sept 10, 2026",html:COMMENTS}; }
 };
+// Tier 1 and Tier 2 gaps carry a brief (user, 2026-11-12): what the topic is, what the LCME asks for (DCI wording),
+// where the master map shows it taught and assessed, and the route (AOC topics go to CIS instead of PCCS/CCS).
+function gapBrief(r){
+  const b=r.brief, w=b.where||{};
+  const lcme=(b.lcme||[]).map(x=>`<div class="lq"><div class="lq-h"><b>${esc(x.el)}</b><span>${esc(x.ed)}</span></div>
+    <blockquote>${esc(x.text)}</blockquote>
+    ${(x.dci||[]).map(d=>`<div class="lq-d"><span class="mono">DCI ${esc(d.ref)}</span> ${esc(d.text)}</div>`).join("")}</div>`).join("");
+  const rows=(w.rows||[]).map(x=>`<tr><td class="num">${x.phase}</td><td><b>${esc(x.module)}</b></td><td class="small">${x.sessions.map(esc).join("<br>")}${x.more?`<br><span class="muted">+ ${x.more} more</span>`:""}</td><td class="small">${esc(x.assess)}</td></tr>`).join("");
+  return `<div class="row" style="gap:6px">${tierPill(tierOf(r))}${statusPill(r.decision||"Pending")}</div>
+    <section class="bf"><h3>What the topic is</h3><p>${esc(b.what)}</p></section>
+    <section class="bf"><h3>Why it is on the list</h3><p><b>What the LCME looks for.</b> ${esc(b.asks)}</p>${lcme}</section>
+    <section class="bf"><h3>Where it is taught and assessed now</h3><p>${esc(w.summary)}</p>
+      ${rows?`<div class="tablebox"><table><thead><tr><th class="num">Phase</th><th>Module or clerkship</th><th>Sessions</th><th>Assessment</th></tr></thead><tbody>${rows}</tbody></table></div>`:""}
+      ${(w.notes||[]).length?`<ul class="nextlist">${w.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>`:""}
+      <p class="small muted">${esc(w.source)}</p></section>
+    <section class="bf"><h3>Route</h3>${dl([["Route",esc(r.route)],["AOC",esc(b.aoc||"None")],["Why",esc(b.route_note)]])}</section>
+    <details class="bf-more"><summary>Register details</summary>${dl([["Tier",esc(r.tier_label||TIER_LABEL[tierOf(r)])],["USMLE (2026 outlines)",esc(r.usmle)],["Basis",esc(r.basis)],["Type",esc(r.type)],["Evidence",esc(r.evidence)],["Notes",esc(r.notes)],["Owner",esc(r.owner)]])}</details>`;
+}
 const PANELS={
   gap(id){ const r=state.gaps.find(g=>g._id===id); if(!r) return null;
     const ids=gapRows().map(g=>g._id), list=ids.includes(id)?ids:state.gaps.slice().sort((a,b)=>a.order-b.order).map(g=>g._id);
+    if(r.brief) return {title:r.topic,sub:`Gap ${r.order} of ${state.gaps.length} · ${GROUP_NAME["G2.2"]}`,html:gapBrief(r)+`
+      <div class="row small" style="gap:6px"><button class="btn" data-panel="rule:tiers">Priority tiers</button><button class="btn" data-panel="rule:usmle">USMLE rule</button><button class="btn" data-panel="rule:routing">Routing order</button><button class="btn" data-panel="rule:decisions">Decision definitions</button></div>
+      ${stepper("gap",list,id,"gap")}`};
     return {title:r.topic,sub:`Gap ${r.order} of ${state.gaps.length} · ${GROUP_NAME["G2.2"]}`,html:`<div class="row" style="gap:6px">${tierPill(tierOf(r))}${statusPill(r.decision||"Pending")}</div>
       ${dl([["Tier",esc(r.tier_label||TIER_LABEL[tierOf(r)])],["USMLE (2026 outlines)",esc(r.usmle)],["Route",esc(r.route)],["Basis",esc(r.basis)],["Area",esc(r.area)],["Type",esc(r.type)],["Evidence",esc(r.evidence)],["Notes",esc(r.notes)],["Owner",esc(r.owner)]])}
       <div class="row small" style="gap:6px"><button class="btn" data-panel="rule:tiers">Priority tiers</button><button class="btn" data-panel="rule:usmle">USMLE rule</button><button class="btn" data-panel="rule:routing">Routing order</button><button class="btn" data-panel="rule:decisions">Decision definitions</button></div>
@@ -841,16 +862,23 @@ function drawPanel(){
   document.getElementById("ipTitle").textContent=r.title; document.getElementById("ipSub").textContent=r.sub||"";
   document.getElementById("ipBody").innerHTML=r.html; return true;
 }
-// The details open in the page (above the content, scrolling with it) at every screen size, never as a side overlay with its own scroll box.
-const inlinePanel=()=>true;
+// The details open in the page (above the content, scrolling with it), except G2.2 gaps and review steps: those slide in
+// from the right beside the table (user, 2026-11-12, "a side panel for each"). Phones keep the in-page view everywhere.
+const SIDE_KINDS=["gap","g22step"];
+const inlinePanel=()=>!(panel&&SIDE_KINDS.includes(panel[0])) || matchMedia("(max-width:700px)").matches;
 let panelFromY=0;
+function placePanel(){
+  const ip=document.getElementById("ip"), slot=document.getElementById("ipSlot");
+  if(inlinePanel()){ if(ip.parentNode!==slot) slot.appendChild(ip); }
+  else if(ip.parentNode===slot) document.body.appendChild(ip);
+}
 function openPanel(spec){
-  const i=spec.indexOf(":"), wasOpen=!!panel; panel=[spec.slice(0,i),spec.slice(i+1)];
+  const i=spec.indexOf(":"), wasOpen=!!panel, wasInline=inlinePanel(); panel=[spec.slice(0,i),spec.slice(i+1)];
   if(!drawPanel()) return;
   document.getElementById("ipBody").scrollTop=0;
-  const ip=document.getElementById("ip"), slot=document.getElementById("ipSlot");
-  if(inlinePanel()){ if(ip.parentNode!==slot) slot.appendChild(ip); if(!wasOpen) panelFromY=scrollY; }
-  else if(ip.parentNode===slot) document.body.appendChild(ip);
+  const ip=document.getElementById("ip");
+  if(inlinePanel()&&(!wasOpen||!wasInline)) panelFromY=scrollY;
+  placePanel();
   ip.classList.add("open"); ip.setAttribute("aria-hidden","false");
   if(inlinePanel()) ip.scrollIntoView({block:"start"});
   if(!wasOpen) document.getElementById("ipX").focus({preventScroll:true});
@@ -1071,7 +1099,7 @@ function artIndex(){
   <div class="grp"><div class="chips">${rows.map(r=>`<a class="chip" href="${esc(r.url)}"${linkAttrs(r.url)} title="${esc(r.notes||r.kind||"")}">${esc(short(r.name))}</a>`).join("")}</div></div></details>`;
 }
 document.addEventListener("toggle",ev=>{ if(ev.target.id==="aix"){ try{ localStorage.setItem("aixClosed",ev.target.open?"0":"1"); }catch(_){} } },true);
-function render(){ document.body.dataset.group=/^g\d/.test(tab)?tab:""; document.getElementById("view").innerHTML=(state.loaded&&tab==="overview"?artIndex():"")+VIEWS[tab](); if(panel) drawPanel(); syncHash(); }   // group pages list their own documents
+function render(){ document.body.dataset.group=/^g\d/.test(tab)?tab:""; document.getElementById("view").innerHTML=(state.loaded&&tab==="overview"?artIndex():"")+VIEWS[tab](); if(panel&&drawPanel()) placePanel(); syncHash(); }   // group pages list their own documents
 
 /* ---------- interactions ---------- */
 document.getElementById("view").addEventListener("click",e=>{
@@ -1229,6 +1257,17 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--sunk)} tr.click:focu
 .dl{display:grid;grid-template-columns:minmax(110px,170px) minmax(0,1fr);gap:8px 14px;margin:0;font-size:13.5px}
 .dl dt{color:var(--muted);font-weight:600} .dl dd{margin:0}
 .ipnav{border-top:1px solid var(--line);padding-top:12px}
+/* G2.2 gap brief (side panel) */
+.bf{display:grid;gap:8px}
+.bf h3{margin:0;font:650 15px/1.3 var(--display);color:var(--navy)}
+.bf p{margin:0;font-size:13.5px;line-height:1.5}
+.lq{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:6px;background:var(--surface)}
+.lq-h{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13px}
+.lq-h span{color:var(--muted);font-size:12px}
+.lq blockquote{margin:0;padding-left:10px;border-left:3px solid var(--accent);font-size:13px;line-height:1.5;font-style:italic}
+.lq-d{font-size:12.5px;line-height:1.45;color:var(--fg)} .lq-d .mono{font-weight:700;color:var(--navy);margin-right:4px}
+.bf .tablebox table{font-size:12.5px} .bf .tablebox td{vertical-align:top}
+.bf-more summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--muted)} .bf-more[open] summary{margin-bottom:8px}
 @media (max-width:560px){.dl{grid-template-columns:1fr;gap:2px}.dl dt{margin-top:8px}}
 </style>
 <aside class="lp" id="lp" aria-hidden="true" aria-label="Link preview">
