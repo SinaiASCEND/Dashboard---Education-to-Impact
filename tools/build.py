@@ -13,7 +13,7 @@ The site is public (GitHub Pages), so only gaps and milestones reach it. Members
 minutes and materials go to files/<WORKBOOK>, which people open from SharePoint with a Mount Sinai
 sign-in. Both working files are rewritten in place, so their SharePoint links keep working.
 """
-import argparse, io, json, os, pathlib, subprocess, sys, tempfile
+import argparse, urllib.parse, io, json, os, pathlib, subprocess, sys, tempfile
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
@@ -136,13 +136,23 @@ SP_FOLDERS = {
     "G3.1": "https://mtsinai.sharepoint.com/:f:/s/Year1InitiativesWorkingGroups2/IgBH-hSShNhETKV8HVP9uYoeASlQ-v2r4e7fM9GV5LjQyCE",
     "G2.2": SP_SITE + "/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FYear1InitiativesWorkingGroups2%2FShared%20Documents%2F03_Working_Groups%2FP2_G2.2_Curriculum-Gap-Closure",
 }
-FOLDER_ORDER = ["01 Charter", "02 Meetings", "02 Meetings › Meeting Minutes", "03 Working Drafts", "Evidence and reports"]
+# Minutes repository (created 2026-11-13): one folder for both groups' official minutes, under
+# 05_Meetings & Recordings › Working Group Minutes on the same site.
+_MIN_PATH = "/sites/Year1InitiativesWorkingGroups2/Shared Documents/05_Meetings & Recordings/Working Group Minutes"
+SP_MINUTES = {
+    "root": SP_SITE + "/Shared%20Documents/Forms/AllItems.aspx?id=" + urllib.parse.quote(_MIN_PATH, safe=""),
+    "G2.2": SP_SITE + "/Shared%20Documents/Forms/AllItems.aspx?id=" + urllib.parse.quote(_MIN_PATH + "/G2.2 Curriculum Gap", safe=""),
+    "G3.1": SP_SITE + "/Shared%20Documents/Forms/AllItems.aspx?id=" + urllib.parse.quote(_MIN_PATH + "/G3.1 Emerging Topics", safe=""),
+}
+FOLDER_ORDER = ["01 Charter", "02 Meetings", "Minutes repository", "03 Working Drafts", "Evidence and reports"]
 _SP = [  # (group, folder, name, kind, date, format, SharePoint UniqueId)
     ("G3.1", "01 Charter", "Charter approval vote (G3.1_Charter_Vote_2026-11)", "Charter vote", "2026-11-05", "Excel", "b110e6c0-e657-4fc1-9973-681e900ed199"),
     ("G3.1", "02 Meetings", "Running agenda", "Agenda", "2026-10-30", "Word", "88c28fff-8412-40a1-aea0-93234c9ea513"),
     ("G3.1", "02 Meetings", "Kickoff slides (Nov 4, 2026)", "Slides", "2026-11-04", "PowerPoint", "41aa74be-01a9-4427-b348-71297f9d7358"),
     ("G3.1", "02 Meetings", "Emerging topics list (until the combined G3.1 Emerging Topics Register is uploaded)", "Topic list", "2026-11-05", "Excel", "cb698f1a-0fd0-40be-adf9-7b0e322f7165"),
-    ("G3.1", "02 Meetings › Meeting Minutes", "Meeting minutes, Nov 4, 2026 (official, Word)", "Minutes", "2026-11-04", "Word", "e2cfd687-796b-4a41-bcc4-add2fef89a84"),
+    ("G3.1", "Minutes repository", "Meeting minutes, Nov 4, 2026 (official, Word)", "Minutes", "2026-11-04", "Word", "173c0507-4cd4-47bb-8cfd-97af7021116f"),
+    ("G3.1", "Minutes repository", "Working group planning minutes, Nov 6, 2026 (Word)", "Minutes", "2026-11-06", "Word", "3e36c86b-2fe4-4f66-86b5-b6aee7c4167d"),
+    ("G2.2", "Minutes repository", "Kickoff meeting minutes, Nov 12, 2026 (draft, Word)", "Minutes", "2026-11-12", "Word", "1eb2b652-dba7-4139-a08d-6ae5b9798f2a"),
     ("G2.2", "02 Meetings", "Running agenda", "Agenda", "2026-10-30", "Word", "810c00e0-9c24-4a59-bde6-6e274acaa15c"),
 ]
 SP_LINKS = [{"name": f"{g} {n}", "group": g, "folder": f, "kind": k, "date": d, "format": fmt, "url": SP_DOC.format(u),
@@ -161,7 +171,7 @@ def folder_of(l):
     n, k = l.get("name", ""), l.get("kind", "")
     if l.get("folder"): return l["folder"]
     if k in ("Charter", "Plan document") or "charter" in n.lower(): return "01 Charter"
-    if k == "Meeting summary": return "02 Meetings › Meeting Minutes"
+    if k == "Meeting summary": return "02 Meetings"
     if k == "Meeting guide": return "02 Meetings"
     return "Evidence and reports"
 
@@ -187,7 +197,7 @@ def main():
               "milestones": [{k: m[k] for k in MS_FIELDS if k in m} for m in data["milestones"]],
               "emerging": [{k: e[k] for k in ("topic", "why", "strength", "status", "pilot", "order", "_id") if k in e} for e in data.get("emerging", [])],
               "links": [{k: l[k] for k in ("name", "kind", "date", "url", "format", "note", "folder") if k in l} for l in links if l.get("url")],
-              "spFolders": SP_FOLDERS, "folderOrder": FOLDER_ORDER,
+              "spFolders": SP_FOLDERS, "spMinutes": SP_MINUTES, "folderOrder": FOLDER_ORDER,
               # Working-group minutes: attendance, decisions and action items (the discussion stays in the Word minutes)
               "minutes": [{k: m[k] for k in MIN_FIELDS if k in m} for m in data["minutes"] if str(m.get("group", "")).startswith(("G2.2", "G3.1"))],
               # Members tab: name, title, seat and photo only (no email, status or notes; those stay in the workbook)
