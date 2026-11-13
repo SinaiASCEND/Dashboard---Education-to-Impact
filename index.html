@@ -346,7 +346,7 @@ const SCHEMAS = {
   ["date","Date","date"],["where","Where it lives","textarea"],["url","Link (https)","text"],["notes","Notes","textarea"]]}
 };
 
-const state = {db:null, actions:[], meetings:[], gaps:[], emerging:[], materials:[], milestones:[], members:[], minutes:[], outbox:[], links:[], kpis:{}, spFolders:{}, folderOrder:[], loaded:false, writable:false};
+const state = {db:null, actions:[], meetings:[], gaps:[], emerging:[], materials:[], milestones:[], members:[], minutes:[], outbox:[], links:[], kpis:{}, spFolders:{}, spMinutes:{}, folderOrder:[], loaded:false, writable:false};
 let tab = "overview";
 const TAB_GROUPS = [
   ["Both groups",[["overview","Home"],["reference","Reference"]]]];
@@ -439,7 +439,7 @@ function groupTeaser(gid){
 function groupFiles(gid){
   const rs=state.links.filter(l=>groupOf(l)===gid);
   if(!rs.length) return `<div class="empty">No ${gid} documents listed yet.</div>`;
-  const order=state.folderOrder.length?state.folderOrder:["01 Charter","02 Meetings","02 Meetings › Meeting Minutes","03 Working Drafts","Evidence and reports"];
+  const order=state.folderOrder.length?state.folderOrder:["01 Charter","02 Meetings","Minutes repository","03 Working Drafts","Evidence and reports"];
   const short=n=>String(n||"").replace(/^G\d\.\d\s+/,"");
   const where=l=>/sharepoint\.com/.test(l.url||"")?"SharePoint":String(l.url||"").startsWith("#")?"This dashboard":/^https?:/.test(l.url||"")?"Web":"This dashboard";
   const row=l=>`<tr><td style="min-width:260px"><b><a href="${esc(l.url)}"${linkAttrs(l.url)}>${esc(short(l.name))}</a></b>${l.note?`<div class="small muted">${esc(l.note)}</div>`:""}</td><td>${esc(l.kind||"")}</td><td class="num">${fmt(l.date)}</td><td>${statusPill(l.format||"")}</td><td class="small">${where(l)}</td></tr>`;
@@ -451,8 +451,8 @@ function groupFiles(gid){
 }
 function gMinutes(gid){
   const ms=state.minutes.filter(m=>String(m.group||"").startsWith(gid)).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
-  const folder=state.spFolders[gid];
-  const head=`<p class="small muted" style="margin:0">Attendance, decisions and action items from each meeting's minutes. The full minutes, with the discussion, are the Word files in the ${folder?`<a href="${esc(folder)}" target="_blank" rel="noopener">${gid} SharePoint folder</a>`:"working group's SharePoint folder"} › 02_Meetings › Meeting Minutes (Mount Sinai sign-in).</p>`;
+  const repo=state.spMinutes[gid], root=state.spMinutes.root;
+  const head=`<p class="small muted" style="margin:0">Attendance, decisions and action items from each meeting's minutes. The full minutes, with the discussion, are the Word files in the ${repo?`<a href="${esc(repo)}" target="_blank" rel="noopener">${gid} minutes folder</a>`:"working group's minutes folder"} of the ${root?`<a href="${esc(root)}" target="_blank" rel="noopener">Working Group Minutes repository</a>`:"Working Group Minutes repository"} (Year 1 Initiatives site › 05_Meetings &amp; Recordings; Mount Sinai sign-in).</p>`;
   if(!ms.length) return head+`<div class="empty">No ${gid} minutes yet.</div>`;
   return head+ms.map(m=>`<section class="card grid" style="gap:10px">
     <div><div class="eyebrow muted">${fmt(m.date)}${m.status?` · ${esc(m.status)}`:""}</div><h3 style="margin:2px 0 0">${esc(m.title||"Meeting")}</h3></div>
@@ -1205,7 +1205,7 @@ renderTabs(); render();
   for(const k of ["gaps","milestones","links","emerging","members","minutes"]) state[k] = Array.isArray(D[k]) ? D[k] : [];
   // Topics only (user, 2026-11-12): the three data-pattern Monitor gaps are not shown anywhere on the site.
   state.gaps = state.gaps.filter(g=>!DATA_PATTERN.test(g.topic||""));
-  state.spFolders = D.spFolders || {}; state.folderOrder = D.folderOrder || [];
+  state.spFolders = D.spFolders || {}; state.spMinutes = D.spMinutes || {}; state.folderOrder = D.folderOrder || [];
   state.workdoc = D.workdoc || {};
   state.kpis = {}; state.outbox = []; state.loaded = true; render();
   const f = document.getElementById("dataAsOf"); if(f && D.generated) f.textContent = "Data as of " + fmt(D.generated) + ". Read-only; updates come from the working groups' project managers.";
