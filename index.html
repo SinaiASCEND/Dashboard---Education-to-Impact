@@ -151,6 +151,10 @@ button.btn{font:600 13px var(--body);border-radius:6px;padding:8px 12px;border:1
 button.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 button.btn.ghost{border-color:transparent;background:none;color:var(--cyan);padding:4px 6px}
 button.btn.danger{color:var(--bad)}
+a.btn{display:inline-block;text-decoration:none;font:600 13px var(--body);border-radius:6px;padding:8px 12px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+a.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+a.btn.primary.g22{background:var(--g22);border-color:var(--g22)}
+a.btn.primary.g31{background:var(--g31);border-color:var(--g31)}
 select,input,textarea{font:14px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 9px;max-width:100%}
 textarea{width:100%;min-height:90px;resize:vertical}
 .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -748,6 +752,7 @@ function homeCard(gid){
 function vHome(){
   return `<div><h2>From Education to Impact: Year 1 working groups</h2><p class="lede">Pick your working group. Each group page has the same six tabs: This year, Topics, How we review, Meetings &amp; minutes, Action items and Documents.</p></div>
   <section class="grid g2">${MY_GOALS.map(homeCard).join("")}</section>
+  <section class="card" id="topic-signup"><div class="row spread"><div><h2>Topic sign-up · both groups</h2><p class="small muted" style="margin:4px 0 0">Pick 2 or 3 topics from your working group's list and say how keen you are on each: Absolutely, Yes or If I have to. One page for both groups; you can see who has chosen each topic. Opens on claude.ai with your Mount Sinai sign-in.</p></div><div class="row small" style="gap:6px"><a class="btn primary g22" href="${SIGNUP_URL}#g22" target="_blank" rel="noopener">G2.2 topics →</a><a class="btn primary g31" href="${SIGNUP_URL}#g31" target="_blank" rel="noopener">G3.1 topics →</a></div></div></section>
   <section class="card" id="gap-or-emerging"><div class="row spread"><div><h2>Gap or emerging topic?</h2><p class="small muted" style="margin:4px 0 0">Two questions decide which group takes a topic.</p></div><button class="btn" data-panel="rule:two">The two-question rule →</button></div>
     <ol class="steps small" style="margin-top:10px"><li><b>Is the program expected to teach it?</b> Expected: Curriculum Gap Working Group. Not expected yet: Emerging Topics Working Group.</li><li><b>How much do we teach now?</b> For an expected topic, this decides whether there is a gap and how large it is.</li></ol></section>
   <section class="card"><div class="row spread"><div><h2>Reference</h2><p class="small muted" style="margin:4px 0 0">The whole plan, Year 1 teams, the SCOPE survey and the Steering Committee papers.</p></div><button class="btn ghost" data-go="reference">Reference</button></div></section>`;
